@@ -1,0 +1,101 @@
+2023-09-13 09:50:22.210  INFO 3104 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 3104 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 09:50:22.225  INFO 3104 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 09:50:23.501  INFO 3104 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 09:50:23.505  INFO 3104 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 09:50:23.605  INFO 3104 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 09:50:24.022  INFO 3104 --- [main] com.fortnox.App                          : Started App in 2.244 seconds (JVM running for 2.807)
+2023-09-13 09:51:00.060  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 09:51:00.062  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent jobs
+2023-09-13 09:51:00.062  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of validated jobs
+2023-09-13 09:51:01.611  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving job-7747f8b8-8585-469e-8780-0e3cec46ccd5
+2023-09-13 09:51:30.711  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Saving job-7747f8b8-8585-469e-8780-0e3cec46ccd5 to a file
+2023-09-13 09:51:35.855  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Job-7747f8b8-8585-469e-8780-0e3cec46ccd5 has been successfully written out.
+2023-09-13 09:51:35.856  INFO 3104 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving job-0e737c12-de4d-4e1e-aa46-a8f61c0ad900
+2023-09-13 09:53:08.977  INFO 15076 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 15076 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 09:53:08.983  INFO 15076 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 09:53:10.086  INFO 15076 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 09:53:10.087  INFO 15076 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 09:53:10.177  INFO 15076 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 09:53:10.572  INFO 15076 --- [main] com.fortnox.App                          : Started App in 2.023 seconds (JVM running for 2.549)
+2023-09-13 09:54:09.207  INFO 15076 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 09:56:32.593  INFO 13508 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 13508 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 09:56:32.599  INFO 13508 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 09:56:33.678  INFO 13508 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 09:56:33.679  INFO 13508 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 09:56:33.761  INFO 13508 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 09:56:34.147  INFO 13508 --- [main] com.fortnox.App                          : Started App in 1.973 seconds (JVM running for 2.513)
+2023-09-13 09:57:34.689  INFO 13508 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 09:57:37.682  INFO 13508 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 09:57:40.241  INFO 13508 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 09:58:36.061  INFO 13508 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving invoice-6243538
+2023-09-13 10:00:36.923  INFO 17480 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 17480 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:00:36.929  INFO 17480 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:00:38.070  INFO 17480 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:00:38.070  INFO 17480 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:00:38.156  INFO 17480 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:00:38.550  INFO 17480 --- [main] com.fortnox.App                          : Started App in 2.059 seconds (JVM running for 2.584)
+2023-09-13 10:01:00.041  INFO 17480 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:01:00.042  INFO 17480 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:01:00.042  INFO 17480 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 10:01:29.940  INFO 19780 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 19780 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:01:29.945  INFO 19780 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:01:31.083  INFO 19780 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:01:31.083  INFO 19780 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:01:31.164  INFO 19780 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:01:31.536  INFO 19780 --- [main] com.fortnox.App                          : Started App in 2.042 seconds (JVM running for 2.582)
+2023-09-13 10:02:00.045  INFO 19780 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:02:00.046  INFO 19780 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:02:00.046  INFO 19780 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 10:02:09.115  INFO 19780 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving invoice-6243538
+2023-09-13 10:02:58.291  INFO 5988 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 5988 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:02:58.295  INFO 5988 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:02:59.364  INFO 5988 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:02:59.365  INFO 5988 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:02:59.456  INFO 5988 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:02:59.878  INFO 5988 --- [main] com.fortnox.App                          : Started App in 2.012 seconds (JVM running for 2.563)
+2023-09-13 10:03:00.035  INFO 5988 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:03:00.036  INFO 5988 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:03:00.036  INFO 5988 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 10:03:06.071  INFO 5988 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving invoice-6243538
+2023-09-13 10:10:02.213  INFO 16028 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 16028 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:10:02.219  INFO 16028 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:10:03.259  INFO 16028 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:10:03.260  INFO 16028 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:10:03.336  INFO 16028 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:10:03.733  INFO 16028 --- [main] com.fortnox.App                          : Started App in 1.974 seconds (JVM running for 2.504)
+2023-09-13 10:11:00.034  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:11:00.035  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent jobs
+2023-09-13 10:11:00.035  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of validated jobs
+2023-09-13 10:11:01.456  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving job-0e737c12-de4d-4e1e-aa46-a8f61c0ad900
+2023-09-13 10:11:21.664  INFO 16028 --- [scheduling-1] com.fortnox.Fortnox                      : Successfully created an invoice on Fortnox
+2023-09-13 10:11:21.665  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Saving job-0e737c12-de4d-4e1e-aa46-a8f61c0ad900 to a file
+2023-09-13 10:11:21.668  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Job-0e737c12-de4d-4e1e-aa46-a8f61c0ad900 has been successfully written out.
+2023-09-13 10:11:21.668  INFO 16028 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving job-778ee420-a105-4339-acff-547eee8bc762
+2023-09-13 10:11:55.248  INFO 13208 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 13208 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:11:55.253  INFO 13208 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:11:56.361  INFO 13208 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:11:56.362  INFO 13208 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:11:56.443  INFO 13208 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:11:56.811  INFO 13208 --- [main] com.fortnox.App                          : Started App in 1.988 seconds (JVM running for 2.498)
+2023-09-13 10:12:00.049  INFO 13208 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:12:00.050  INFO 13208 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:12:00.050  INFO 13208 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 10:12:00.910  INFO 13208 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully ran job retrieval process
+2023-09-13 10:12:40.294  INFO 19012 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 19012 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:12:40.299  INFO 19012 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:12:41.416  INFO 19012 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:12:41.416  INFO 19012 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:12:41.495  INFO 19012 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:12:41.888  INFO 19012 --- [main] com.fortnox.App                          : Started App in 2.008 seconds (JVM running for 2.524)
+2023-09-13 10:13:00.036  INFO 19012 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:13:00.037  INFO 19012 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:13:00.037  INFO 19012 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
+2023-09-13 10:13:37.003  INFO 20356 --- [main] com.fortnox.App                          : Starting App on Prince-11 with PID 20356 (C:\Code\java\fortnox\target\classes started by Prince in C:\Code\java\fortnox)
+2023-09-13 10:13:37.007  INFO 20356 --- [main] com.fortnox.App                          : No active profile set, falling back to default profiles: default
+2023-09-13 10:13:38.075  INFO 20356 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-09-13 10:13:38.076  INFO 20356 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.29]
+2023-09-13 10:13:38.165  INFO 20356 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-09-13 10:13:38.564  INFO 20356 --- [main] com.fortnox.App                          : Started App in 2.017 seconds (JVM running for 2.54)
+2023-09-13 10:14:00.043  INFO 20356 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving validated jobs
+2023-09-13 10:14:00.044  INFO 20356 --- [scheduling-1] com.fortnox.RetrieveJob                  : Successfully retrieved previously sent invoices
+2023-09-13 10:14:00.044  INFO 20356 --- [scheduling-1] com.fortnox.RetrieveJob                  : Retrieving list of invoices
