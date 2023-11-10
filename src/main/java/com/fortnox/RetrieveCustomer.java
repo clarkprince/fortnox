@@ -66,39 +66,52 @@ public class RetrieveCustomer {
 	private static void insertToFortnox(JsonNode data, String token) throws Exception {	
 		log.info("inserting customer to fortnox");
 		try {
-    	String uri = "https://api.fortnox.se/3/customers";
-    	
-    	RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-		headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-		headers.set("Authorization", "Bearer "+ token);
-		
-		Map<String, Object> customerParent = new HashMap<>();
-		Map<String, Object> customer = new HashMap<>();
-		if(data.get("myId").asText() == "") {
-			customer.put("CustomerNumber", data.get("id").asText());
-		}else {
-			customer.put("CustomerNumber", data.get("myId").asText());
-		}
+	    	String uri = "https://api.fortnox.se/3/customers";
+	    	String vatNumber = data.get("vatNumber").asText();
+	    	if (vatNumber == null || vatNumber.equalsIgnoreCase("null") || vatNumber.equalsIgnoreCase("")) {
+	    		log.error("No vat number for customer: " + data.get("name").asText());
+	    		return;
+	    	}
+	    	
+	    	RestTemplate restTemplate = new RestTemplate();
+			restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+			headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+			headers.set("Authorization", "Bearer "+ token);
+			
+			Map<String, Object> customerParent = new HashMap<>();
+			Map<String, Object> customer = new HashMap<>();
+			if(data.get("myId") == null || data.get("myId").asText() == "") {
+				customer.put("CustomerNumber", data.get("id").asText());
+			}else {
+				customer.put("CustomerNumber", data.get("myId").asText());
+			}
+	
+			customer.put("Name", data.get("name").asText());
+			customer.put("Address1", data.get("addressStreet").asText());
+			customer.put("Address2",  data.get("addressProvince").asText());
+			customer.put("City",  data.get("addressCity").asText());
+			customer.put("ZipCode",  data.get("addressZIP").asText());
+			
+			customerParent.put("Customer", customer);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String newjson = mapper.writeValueAsString(customerParent);
+			HttpEntity<String> entity = new HttpEntity<String>(newjson, headers);
+			
+			try {
+				ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+				if (response.getStatusCodeValue() == 201) {
+					log.info("Successfully created an customer on Fortnox");
+				}
+			}catch (Exception e) {
+				ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.PUT, entity, String.class);
+				if (response.getStatusCodeValue() == 201) {
+					log.info("Successfully updated an customer on Fortnox");
+				}
+			}
 
-		customer.put("Name", data.get("name").asText());
-		customer.put("Address1", data.get("addressStreet").asText());
-		customer.put("Address2",  data.get("addressProvince").asText());
-		customer.put("City",  data.get("addressCity").asText());
-		customer.put("ZipCode",  data.get("addressZIP").asText());
-		
-		customerParent.put("Customer", customer);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		String newjson = mapper.writeValueAsString(customerParent);
-		HttpEntity<String> entity = new HttpEntity<String>(newjson, headers);
-
-		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
-		if (response.getStatusCodeValue() == 201) {
-			log.info("Successfully created an customer on Fortnox");
-		}
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

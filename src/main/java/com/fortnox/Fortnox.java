@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -20,10 +21,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -164,7 +168,7 @@ public class Fortnox {
 					JsonNode partLs = doGetArticles(auth.get("token"));
 					for(JsonNode part : partLs) {
 						try {
-//							if(!part.get("ArticleNumber").asText().equalsIgnoreCase("20125")) {
+//							if(!part.get("ArticleNumber").asText().equalsIgnoreCase("922")) {
 //								continue;
 //							}
 							JsonNode partDetails = doGetPartDetails(part.get("ArticleNumber").asText(), auth.get("token"));
@@ -197,7 +201,8 @@ public class Fortnox {
 	}
 	
 	public static void savePartToFile(JsonNode part, String domain) throws IOException {
-		String fname = "parts/"+domain+"/"+part.get("ArticleNumber").asText()+".json";
+		String partName = Normalizer.normalize(part.get("ArticleNumber").asText(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+		String fname = "parts/"+domain+"/"+partName+".json";
 		if(!Files.exists(Paths.get(fname))) {
 			Files.createDirectories(Paths.get("parts/"+domain+"/"));
 		    Files.createFile(Paths.get(fname));
@@ -213,7 +218,8 @@ public class Fortnox {
 	}
 	
 	public static void saveDepotToFile(JsonNode part, JsonNode depot, String domain) throws IOException {
-		String fname = "depots/"+domain+"/"+part.get("ArticleNumber").asText()+"_"+ depot.get("stockPointCode").asText() +".json";
+		String partName = Normalizer.normalize(part.get("ArticleNumber").asText(), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+		String fname = "depots/"+domain+"/"+partName+"_"+ depot.get("stockPointCode").asText() +".json";
 		if(!Files.exists(Paths.get(fname))) {
 			Files.createDirectories(Paths.get("depots/"+domain+"/"));
 		    Files.createFile(Paths.get(fname));
@@ -287,10 +293,10 @@ public class Fortnox {
 	public static void doPartsInsert(JsonNode part, String domain, String apiKey) {
 			Insert.insertPart(part.get("ArticleNumber").toString(), part.get("Description").toString(),
 					part.get("SalesPrice").toString(), part.get("VAT").toString(), part.get("ManufacturerArticleNumber") !=null ? part.get("ManufacturerArticleNumber").toString() : "",
-							part.get("Type").asText(), part.get("StockGoods").asBoolean(true), domain, apiKey);
+							part.get("Type").asText(), part.get("StockGoods").asBoolean(true), part.get("Active").asBoolean(true), domain, apiKey);
 	}
 	
-	public static void doInvoiceCreate(JsonNode map, String sDomain, boolean isInvoice, JsonNode invoiceMap) throws IOException {
+	public static ResponseEntity<String> doInvoiceCreate(JsonNode map, String sDomain, boolean isInvoice, JsonNode invoiceMap) throws IOException {
 		String settingsJson = new String(Files.readAllBytes(Paths.get("settings.json")));
 		ObjectMapper settingsMapper = new ObjectMapper();
 		Map settings = settingsMapper.readValue(settingsJson, Map.class);
@@ -319,14 +325,6 @@ public class Fortnox {
 		
 		String token = Controller.getAuth(refreshToken, true, domain, apikey);
 		
-    	// loop through custom values
-//    	boolean isInvoice = false;
-//    	for(JsonNode vals : map.get("customFieldValues")) {
-//    		if(vals.get("fortnox") != null && vals.get("fortnox").asText().equalsIgnoreCase("invoice")) {
-//    			isInvoice = true;
-//    		}
-//    	}
-		
     	String uri = "https://api.fortnox.se/3/orders";
     	if(isInvoice) {
         	uri = "https://api.fortnox.se/3/invoices";
@@ -342,7 +340,10 @@ public class Fortnox {
 		Map<String, Object> newMap = new HashMap<>();
 		Map<String, Object> invoice = new HashMap<>();
 		String custNum = map.get("customer").get("myId").asText();
-		if(custNum != null && !custNum.equalsIgnoreCase("null")) {
+		if (custNum == null || custNum.equalsIgnoreCase("null") ||  custNum.equalsIgnoreCase("")) {
+			custNum = map.get("customer").get("id").asText();
+		}
+		if(custNum != null) {
 			newMap.put("CustomerNumber", custNum);
 			newMap.put("CustomerName", map.get("customer").get("name").asText());
 			newMap.put("Address1", map.get("addressStreet").asText());
@@ -354,14 +355,14 @@ public class Fortnox {
 
 			String description = map.get("description").asText();
 	    	if(isInvoice) {
-	    		description = invoiceMap.get("description").asText();
+	    		description = invoiceMap.get("description").asText() == null || invoiceMap.get("description").asText() == "null"? "" : invoiceMap.get("description").asText()  ;
 				if(description != null && description.trim() != "") {
 					String myId = invoiceMap.get("myId") != null ? invoiceMap.get("myId").asText() : "";
 					String num = invoiceMap.get("num") != null ? String.valueOf(invoiceMap.get("num").asInt()) : "";
 					String technician = map.get("technician").get("name") != null ? map.get("technician").get("name").asText() : "";
 					String comment = myId + " - " + num + " - " + technician + " - " + description;
 					newMap.put("Comments", comment);
-					newMap.put("YourReference", comment);
+					newMap.put("Remarks", myId + " - " + num + " - " + technician);
 				}
 	    	}else {
 				String myId = map.get("myId") != null ? map.get("myId").asText() : "";
@@ -369,10 +370,10 @@ public class Fortnox {
 				String technician = map.get("technician").get("name") != null ? map.get("technician").get("name").asText() : "";
 				String comment = myId + " - " + num + " - " + technician + " - " + description;
 				newMap.put("Comments", comment);
-				newMap.put("YourReference", comment);
+				newMap.put("Remarks", myId + " - " + num + " - " + technician);
 	    	}
-
 			
+			newMap.put("DeliveryName", map.get("site").get("myId").asText() +" " + map.get("site").get("name").asText());
 			newMap.put("DeliveryAddress1", map.get("addressStreet").asText());
 			newMap.put("DeliveryAddress2",  map.get("addressProvince").asText());
 			newMap.put("DeliveryCity",  map.get("addressCity").asText());
@@ -388,17 +389,21 @@ public class Fortnox {
 				if (parts.size() > 0) {
 					for (JsonNode part : parts) {
 						Map<String, Object> d = new HashMap<>();
-						JsonNode article = partsMap.get(part.get("partReference").asText());
+						JsonNode article = partsMap.get(part.get("partProductCode").asText());
 						if(article == null && !havePartsBeenRun) {
 							getParts();
 							havePartsBeenRun = true;
 							partsMap = getPartsMap(domain);
-							article = partsMap.get(part.get("partReference").asText());
+							article = partsMap.get(part.get("partProductCode").asText());
 						}
 						
 						if(article != null) {
-							d.put("ArticleNumber", part.get("partReference").asText());
-							d.put("DeliveredQuantity", part.get("quantity").asText());
+							String q = part.get("quantity").asText();
+							if(q != null && q.length() > 3 && q.contains(",")) {
+								q = q.substring(0, q.length()-3);
+							}
+							d.put("ArticleNumber", part.get("partProductCode").asText());
+							d.put("DeliveredQuantity", q);
 							d.put("Description", part.get("description").asText());
 						}
 						rows.add(d);
@@ -418,8 +423,12 @@ public class Fortnox {
 						}
 						
 						if(article != null) {
+							String q = part.get("quantity").asText();
+							if(q != null && q.length() > 3 && q.contains(",")) {
+								q = q.substring(0, q.length()-3);
+							}
 							d.put("ArticleNumber", part.get("reference").asText());
-							d.put("DeliveredQuantity", part.get("quantity").asText());
+							d.put("DeliveredQuantity", q);
 							d.put("Description", article.get("Description").asText());
 						}
 						rows.add(d);
@@ -443,10 +452,14 @@ public class Fortnox {
 				if (response.getStatusCodeValue() == 201) {
 					log.info("Successfully created an invoice on Fortnox");
 				}
+				return response;
 			} catch (Exception e) {
 				log.error(e.getMessage());
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
-		}		
+		}
+		
+		return null;
 	}
 	
 	public static Map<String, JsonNode> getPartsMap(String domain) throws IOException {
@@ -457,7 +470,8 @@ public class Fortnox {
 
         String[] pl = f.list();
         for (String p : pl) {
-			String partJson = new String(Files.readAllBytes(Paths.get(path + p)));
+    		String partName = Normalizer.normalize(p, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+			String partJson = new String(Files.readAllBytes(Paths.get(path + partName)));
 			JsonNode partDetails = partMapper.readTree(partJson);
           	partsMap.put(partDetails.get("ArticleNumber").asText(), partDetails);
         }

@@ -1,7 +1,7 @@
 [ {
-  "integrate" : {
-    "fortNoxRefreshToken" : "9a31d8b5e5e8faaf65e288940c2bfa12fca81b39",
-    "synchroteamAPIKey" : "389a044d-fc53-4ebe-93ef-56d2ad78153e",
-    "synchroteamDomain" : "integrate"
+  "anolytech" : {
+    "fortNoxRefreshToken" : "b83317129865d6d31a91e82dac5d2031cc62e9f1",
+    "synchroteamAPIKey" : "f1a48c71-985a-42bd-bc56-f13848729296",
+    "synchroteamDomain" : "anolytech"
   }
 } ]

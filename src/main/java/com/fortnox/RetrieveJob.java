@@ -53,8 +53,8 @@ public class RetrieveJob {
 					LinkedHashMap<String, Object> v =  (LinkedHashMap<String, Object>) p.getValue(); 
 					checkingValidatedJobs(v.get("synchroteamDomain").toString(), v.get("synchroteamAPIKey").toString());
 					invoiceList(v.get("synchroteamDomain").toString(), v.get("synchroteamAPIKey").toString());
+					//retrieveAndSaveJob("38e6ed38-6554-4aaf-92cc-9aef2a88201c","anolytech","f1a48c71-985a-42bd-bc56-f13848729296");
 				}
-				
 			}
 		}catch(Exception e) {
 			log.error("Error getting tenant settings. "+ e);

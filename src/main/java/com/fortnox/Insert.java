@@ -55,7 +55,7 @@ public class Insert {
 		}
 	}
 	
-	public static void insertPart(String reference, String name, String price, String vat, String note, String type, boolean tracked, String domain, String apiKey) {	
+	public static void insertPart(String reference, String name, String price, String vat, String note, String type, boolean tracked, boolean active, String domain, String apiKey) {	
 		Map<String,Object> map = new HashMap<>();
 		Map<String,Object> category = new HashMap<>();
 		Map<String,Object> tax = new HashMap<>();
@@ -69,6 +69,7 @@ public class Insert {
 		map.put("isTracked", tracked);
 		map.put("description", note.replace("\"", "").trim());
 		map.put("category", category);
+		map.put("status", active ? "active" : "inactive");
 		String aType = "part";
 		if (type.equalsIgnoreCase("SERVICE")) {
 			aType = "service";
