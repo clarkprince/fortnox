@@ -1,8 +1,9 @@
 /.vscode
-/target
 
-app.log
-settings.json
-tenants.json
-target/
-application.properties
+# Build output
+/target/
+
+# Logs and config
+*.log
+*.json
+*.properties
