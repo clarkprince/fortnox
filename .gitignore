@@ -1,0 +1,8 @@
+/.vscode
+target
+
+app.log
+settings.json
+tenants.json
+target/
+application.properties

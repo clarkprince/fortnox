@@ -1,7 +1,9 @@
-[ {
-  "anolytech" : {
-    "fortNoxRefreshToken" : "b83317129865d6d31a91e82dac5d2031cc62e9f1",
-    "synchroteamAPIKey" : "f1a48c71-985a-42bd-bc56-f13848729296",
-    "synchroteamDomain" : "anolytech"
+[
+  {
+    "workwitsolution": {
+      "fortNoxRefreshToken": "6ddcb46f684a9b8c0ed14b836937963fc08111e3",
+      "synchroteamAPIKey": "b1636e5d-02f1-499d-8ad6-e69fc042b1ac",
+      "synchroteamDomain": "workwitsolution"
+    }
   }
-} ]
+]
