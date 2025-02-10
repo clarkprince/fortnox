@@ -53,8 +53,7 @@ public class ProcessManager implements CommandLineRunner {
         while (true) {
             runProcessesByTenant();
             // wait for 5 minutes
-            // Thread.sleep(300000);
-            Thread.sleep(60000);
+            Thread.sleep(300000);
         }
     }
 
@@ -65,7 +64,6 @@ public class ProcessManager implements CommandLineRunner {
 
     public void runProcessesByTenant() {
         String fromTime = LocalDateTime.now().minusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        fromTime = "2025-02-03 00:00:00";
         List<Tenant> tenants = authorisedTenants();
         for (Tenant tenant : tenants) {
             try {
@@ -73,10 +71,10 @@ public class ProcessManager implements CommandLineRunner {
                     continue;
 
                 // Run all processes
-                // fnCustomersService.getCustomers(tenant, fromTime, 500);
-                // articlesService.getParts(tenant, fromTime, 500);
+                fnCustomersService.getCustomers(tenant, fromTime, 500);
+                articlesService.getParts(tenant, fromTime, 500);
                 jobsService.checkingValidatedJobs(tenant, fromTime, 100);
-                // synchroInvoicesService.invoiceList(tenant, fromTime, 100);
+                synchroInvoicesService.invoiceList(tenant, fromTime, 100);
 
             } catch (Exception e) {
                 log.error("Error during process execution: ", e);
