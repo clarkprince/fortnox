@@ -64,10 +64,7 @@ public class FortnoxAuth {
 
     public static Map<String, String> doAuth(String code, boolean isRefresh) throws IOException {
         Map<String, String> tok = new HashMap<String, String>();
-        String settingsJson = new String(Files.readAllBytes(Paths.get("settings.json")));
-        ObjectMapper settingsMapper = new ObjectMapper();
-        Map settings = settingsMapper.readValue(settingsJson, Map.class);
-        String clientSecret = settings.get("clientSecret").toString();
+        String clientSecret = "8j9LCS7tj8";
         String clientId = "KGtuCBfCxWhA";
 
         String auth = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
