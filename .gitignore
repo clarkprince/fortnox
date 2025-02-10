@@ -1,5 +1,5 @@
 /.vscode
-target
+/target
 
 app.log
 settings.json
