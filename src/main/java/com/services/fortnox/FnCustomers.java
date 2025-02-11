@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +65,7 @@ public class FnCustomers {
         }
     }
 
-    public void getCustomers(Tenant tenant, String fromTime, int size) throws IOException {
+    public ProcessMonitor getCustomers(Tenant tenant, String fromTime, int size, ProcessMonitor processMonitor) throws IOException {
         int offset = 0;
         try {
             for (int i = 0; i < totalPages; i++) {
@@ -78,6 +79,7 @@ public class FnCustomers {
         }
         totalPages = 1;
         offset = 0;
+        return processMonitor;
     }
 
     public JsonNode doGetCustomers(Tenant tenant, String fromTime, int size, int offset) {

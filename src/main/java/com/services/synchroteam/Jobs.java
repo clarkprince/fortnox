@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.entities.JobsHistory;
+import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +35,7 @@ public class Jobs {
 	@Autowired
 	private Invoices fortnoxInvoices;
 
-	public void checkingValidatedJobs(Tenant tenant, String fromTime, int pageSize) {
+	public ProcessMonitor checkingValidatedJobs(Tenant tenant, String fromTime, int pageSize, ProcessMonitor processMonitor) {
 		log.info("Retrieving validated jobs");
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -72,6 +73,7 @@ public class Jobs {
 			log.error(e.getMessage());
 			e.printStackTrace();
 		}
+		return processMonitor;
 	}
 
 	public String requestJobs(Tenant tenant, String fromTime, int pageSize, int page) {

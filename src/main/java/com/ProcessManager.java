@@ -17,8 +17,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.constants.Processes;
+import com.entities.Activity;
+import com.entities.ProcessMonitor;
 import com.entities.Tenant;
+import com.repository.ActivityRepository;
 import com.repository.TenantRepository;
+import com.services.ProcessMonitorService;
 import com.services.fortnox.Articles;
 import com.services.fortnox.FnCustomers;
 import com.services.fortnox.FortnoxAuth;
@@ -34,6 +39,12 @@ public class ProcessManager implements CommandLineRunner {
 
     @Autowired
     private TenantRepository tenantRepository;
+
+    @Autowired
+    private ProcessMonitorService processMonitorService;
+
+    @Autowired
+    private ActivityRepository activityRepository;
 
     @Autowired
     private Jobs jobsService;
@@ -53,7 +64,8 @@ public class ProcessManager implements CommandLineRunner {
         while (true) {
             runProcessesByTenant();
             // wait for 5 minutes
-            Thread.sleep(300000);
+            // Thread.sleep(300000);
+            Thread.sleep(3000000);
         }
     }
 
@@ -71,16 +83,63 @@ public class ProcessManager implements CommandLineRunner {
                     continue;
 
                 // Run all processes
-                fnCustomersService.getCustomers(tenant, fromTime, 500);
-                articlesService.getParts(tenant, fromTime, 500);
-                jobsService.checkingValidatedJobs(tenant, fromTime, 100);
-                synchroInvoicesService.invoiceList(tenant, fromTime, 100);
-
+                runCustomerProcess(tenant, fromTime);
+                runPartsProcess(tenant, fromTime);
+                runJobsProcess(tenant, fromTime);
+                runInvoiceProcess(tenant, fromTime);
             } catch (Exception e) {
                 log.error("Error during process execution: ", e);
             }
         }
 
+    }
+
+    private void runCustomerProcess(Tenant tenant, String fromTime) {
+        try {
+            ProcessMonitor processMonitor = new ProcessMonitor(Processes.CUSTOMERS, tenant.getSynchroteamDomain());
+            processMonitor = fnCustomersService.getCustomers(tenant, fromTime, 500, processMonitor);
+            processMonitorService.saveOrUpdate(processMonitor);
+        } catch (Exception e) {
+            log.error("Error during process execution: ", e);
+        }
+    }
+
+    private void runPartsProcess(Tenant tenant, String fromTime) {
+        try {
+            ProcessMonitor processMonitor = new ProcessMonitor(Processes.PARTS, tenant.getSynchroteamDomain());
+            processMonitor = articlesService.getParts(tenant, fromTime, 500, processMonitor);
+            processMonitorService.saveOrUpdate(processMonitor);
+        } catch (Exception e) {
+            log.error("Error during process execution: ", e);
+        }
+    }
+
+    private void runJobsProcess(Tenant tenant, String fromTime) {
+        try {
+            ProcessMonitor processMonitor = new ProcessMonitor(Processes.JOBS, tenant.getSynchroteamDomain());
+            processMonitor = jobsService.checkingValidatedJobs(tenant, fromTime, 100, processMonitor);
+            processMonitorService.saveOrUpdate(processMonitor);
+        } catch (Exception e) {
+            log.error("Error during process execution: ", e);
+        }
+    }
+
+    private void runInvoiceProcess(Tenant tenant, String fromTime) {
+        try {
+            ProcessMonitor processMonitor = new ProcessMonitor(Processes.INVOICES, tenant.getSynchroteamDomain());
+            processMonitor = synchroInvoicesService.invoiceList(tenant, fromTime, 100, processMonitor);
+            processMonitorService.saveOrUpdate(processMonitor);
+            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities());
+        } catch (Exception e) {
+            log.error("Error during process execution: ", e);
+        }
+    }
+
+    private void saveActivities(String tenantDomain, List<Activity> activities) {
+        for (Activity activity : activities) {
+            activity.setTenant(tenantDomain);
+            activityRepository.save(activity);
+        }
     }
 
     private List<Tenant> authorisedTenants() {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.entities.Part;
+import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -28,7 +29,7 @@ public class Articles {
     @Autowired
     private PartRepository partRepository;
 
-    public void getParts(Tenant tenant, String fromTime, int size) throws IOException {
+    public ProcessMonitor getParts(Tenant tenant, String fromTime, int size, ProcessMonitor processMonitor) throws IOException {
         int i = 0;
         while (i < totalPages) {
             offset = i * size;
@@ -65,6 +66,7 @@ public class Articles {
         }
         totalPages = 1;
         offset = 0;
+        return processMonitor;
     }
 
     public void savePartToDatabase(JsonNode partNode, String domain) {

@@ -1,5 +1,7 @@
 package com.entities;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +24,15 @@ public class Tenant {
     @Column(name = "synchroteam_api_key")
     private String synchroteamAPIKey;
 
-    @Transient
+    @Column(name = "fortnox_token", columnDefinition = "TEXT")
     private String fortnoxToken;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    @PreUpdate
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

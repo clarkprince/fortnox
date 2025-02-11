@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.entities.InvoiceHistory;
+import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ public class SynchroInvoices {
 	@Autowired
 	private Jobs jobsService;
 
-	public void invoiceList(Tenant tenant, String fromTime, int pageSize) {
+	public ProcessMonitor invoiceList(Tenant tenant, String fromTime, int pageSize, ProcessMonitor processMonitor) {
 
 		log.info("Retrieving validated jobs");
 		ObjectMapper mapper = new ObjectMapper();
@@ -69,7 +70,7 @@ public class SynchroInvoices {
 		} catch (Exception e) {
 			log.error("Failed to retrieve invoice list: ", e);
 		}
-
+		return processMonitor;
 	}
 
 	public String requestInvoices(Tenant tenant, String fromTime, int pageSize, int page) {
