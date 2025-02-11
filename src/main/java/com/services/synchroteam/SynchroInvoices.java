@@ -33,8 +33,6 @@ public class SynchroInvoices {
 	private Jobs jobsService;
 
 	public ProcessMonitor invoiceList(Tenant tenant, String fromTime, int pageSize, ProcessMonitor processMonitor) {
-
-		log.info("Retrieving validated jobs");
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
