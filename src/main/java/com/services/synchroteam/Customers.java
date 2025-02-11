@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.entities.Activity;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +49,8 @@ public class Customers {
         return null;
     }
 
-    public static void insertCustomer(String myId, String name, String address2, String address3, String address4, String postcode, Tenant tenant) {
+    public static Activity insertCustomer(String myId, String name, String address2, String address3, String address4, String postcode, Tenant tenant,
+            Activity activity) {
 
         String address = address2 + (!Utils.isEmpty(address3) ? ", " : "") + address3 + (!Utils.isEmpty(address4) ? ", " : "") + address4
                 + (!Utils.isEmpty(postcode) ? ", " : "") + postcode;
@@ -66,11 +68,14 @@ public class Customers {
 
             if (response != null) {
                 log.info("Customer " + myId + "-" + name + " successfully added.");
+                activity.setSuccessful(true);
+                activity.setActivity2(Utils.prettyPrint(response));
             }
         } catch (Exception e) {
             log.error("Failed to insert Customer. Skipping. " + e);
             // e.printStackTrace();
         }
+        return activity;
     }
 
     public static boolean customerExists(String id, Tenant tenant) {

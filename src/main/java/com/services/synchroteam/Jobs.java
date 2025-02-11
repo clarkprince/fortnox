@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.entities.Activity;
 import com.entities.JobsHistory;
 import com.entities.ProcessMonitor;
 import com.entities.Tenant;
@@ -54,12 +55,16 @@ public class Jobs {
 
 					if (jobNode.size() > 0) {
 						for (JsonNode j : jobNode) {
+
 							String myId = j.get("id").asText();
 							if (!Utils.isEmpty(myId)) {
 								JobsHistory existingJob = jobsHistoryRepository.findById(myId).orElse(null);
 								if (existingJob == null) {
+									Activity activity = new Activity();
 									JsonNode map = retrieveJob(myId, tenant);
-									sendAndSaveJob(myId, map, tenant);
+									activity.setActivity1(map.toPrettyString());
+									sendAndSaveJob(myId, map, tenant, activity);
+									processMonitor.getActivities().add(activity);
 								}
 							}
 						}
@@ -70,9 +75,11 @@ public class Jobs {
 			} while (page <= totalPages);
 			log.info("Successfully ran job retrieval process");
 		} catch (Exception e) {
+			processMonitor.setSuccessful(false);
 			log.error(e.getMessage());
 			e.printStackTrace();
 		}
+		processMonitor.setSuccessful(true);
 		return processMonitor;
 	}
 
@@ -97,17 +104,20 @@ public class Jobs {
 		return map;
 	}
 
-	private void sendAndSaveJob(String jobId, JsonNode map, Tenant tenant) throws IOException {
+	private Activity sendAndSaveJob(String jobId, JsonNode map, Tenant tenant, Activity activity) throws IOException {
 		try {
-			fortnoxInvoices.doInvoiceCreate(map, false, null, tenant);
+			activity = fortnoxInvoices.invoiceOrOrderCreate(map, false, null, tenant, activity);
 
 			JobsHistory jobHistory = new JobsHistory();
 			jobHistory.setId(jobId);
 			jobsHistoryRepository.save(jobHistory);
 			log.info("Job-" + jobId + " has been successfully been saved.");
 		} catch (Exception e) {
+			activity.setSuccessful(false);
+			activity.setMessage(e.getMessage());
 			e.printStackTrace();
 		}
+		return activity;
 	}
 
 	public String getFieldFromUser(String id, Tenant tenant) {

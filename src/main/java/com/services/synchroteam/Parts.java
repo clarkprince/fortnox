@@ -6,15 +6,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.entities.Activity;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.utils.Utils;
 
 public class Parts {
 
     private final static Logger log = LoggerFactory.getLogger(Parts.class);
 
-    public static void insertPart(String reference, String name, String price, String vat, String note, String type, boolean tracked, boolean active,
-            Tenant tenant) {
+    public static Activity insertPart(String reference, String name, String price, String vat, String note, String type, boolean tracked,
+            boolean active, Tenant tenant, Activity activity) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> category = new HashMap<>();
         Map<String, Object> tax = new HashMap<>();
@@ -43,11 +45,14 @@ public class Parts {
 
             if (response != null) {
                 log.info("Part " + name + " successfully added/updated.");
+                activity.setSuccessful(true);
+                activity.setActivity2(Utils.prettyPrint(response));
             }
         } catch (Exception e) {
             log.error("Failed to insert Part. Skipping." + e);
-            // e.printStackTrace();
+            activity.setSuccessful(false);
         }
+        return activity;
     }
 
 }

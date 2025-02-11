@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.entities.Activity;
 import com.entities.InvoiceHistory;
 import com.entities.ProcessMonitor;
 import com.entities.Tenant;
@@ -55,9 +56,12 @@ public class SynchroInvoices {
 							if (!Utils.isEmpty(invoiceId)) {
 								InvoiceHistory existingInvoice = invoiceHistoryRepository.findById(invoiceId).orElse(null);
 								if (existingInvoice == null) {
+									Activity activity = new Activity();
 									JsonNode job = jobsService.retrieveJob(jobId, tenant);
 									JsonNode invoice = retrieveInvoice(invoiceId, tenant);
-									sendAndSaveInvoice(invoiceId, job, invoice, tenant);
+									activity.setActivity1(invoice.toPrettyString());
+									activity = sendAndSaveInvoice(invoiceId, job, invoice, tenant, activity);
+									processMonitor.getActivities().add(activity);
 								}
 							}
 						}
@@ -68,8 +72,10 @@ public class SynchroInvoices {
 			} while (page <= totalPages);
 			log.info("Successfully processed invoices");
 		} catch (Exception e) {
+			processMonitor.setSuccessful(false);
 			log.error("Failed to retrieve invoice list: ", e);
 		}
+		processMonitor.setSuccessful(true);
 		return processMonitor;
 	}
 
@@ -94,16 +100,19 @@ public class SynchroInvoices {
 		return invoiceMap;
 	}
 
-	private void sendAndSaveInvoice(String invoiceId, JsonNode jobMap, JsonNode invoiceMap, Tenant tenant) throws IOException {
+	private Activity sendAndSaveInvoice(String invoiceId, JsonNode jobMap, JsonNode invoiceMap, Tenant tenant, Activity activity) throws IOException {
 		try {
-			fortnoxInvoices.doInvoiceCreate(jobMap, true, invoiceMap, tenant);
+			activity = fortnoxInvoices.invoiceOrOrderCreate(jobMap, true, invoiceMap, tenant, activity);
 
 			InvoiceHistory invoiceHistory = new InvoiceHistory();
 			invoiceHistory.setId(invoiceId);
 			invoiceHistoryRepository.save(invoiceHistory);
 			log.info("Invoice-" + invoiceId + " has been successfully sent.");
 		} catch (Exception e) {
+			activity.setSuccessful(false);
+			activity.setMessage(e.getMessage());
 			e.printStackTrace();
 		}
+		return activity;
 	}
 }

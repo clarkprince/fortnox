@@ -21,6 +21,9 @@ public class Activity {
     @Column(name = "activity2", columnDefinition = "TEXT")
     private String activity2;
 
+    @Column(name = "process", columnDefinition = "TEXT")
+    private String process;
+
     @Column(name = "successful", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean successful;
 

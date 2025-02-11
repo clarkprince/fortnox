@@ -99,6 +99,7 @@ public class ProcessManager implements CommandLineRunner {
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.CUSTOMERS, tenant.getSynchroteamDomain());
             processMonitor = fnCustomersService.getCustomers(tenant, fromTime, 500, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
+            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities(), Processes.CUSTOMERS);
         } catch (Exception e) {
             log.error("Error during process execution: ", e);
         }
@@ -109,6 +110,7 @@ public class ProcessManager implements CommandLineRunner {
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.PARTS, tenant.getSynchroteamDomain());
             processMonitor = articlesService.getParts(tenant, fromTime, 500, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
+            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities(), Processes.PARTS);
         } catch (Exception e) {
             log.error("Error during process execution: ", e);
         }
@@ -119,6 +121,7 @@ public class ProcessManager implements CommandLineRunner {
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.JOBS, tenant.getSynchroteamDomain());
             processMonitor = jobsService.checkingValidatedJobs(tenant, fromTime, 100, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
+            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities(), Processes.JOBS);
         } catch (Exception e) {
             log.error("Error during process execution: ", e);
         }
@@ -129,15 +132,16 @@ public class ProcessManager implements CommandLineRunner {
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.INVOICES, tenant.getSynchroteamDomain());
             processMonitor = synchroInvoicesService.invoiceList(tenant, fromTime, 100, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
-            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities());
+            saveActivities(tenant.getSynchroteamDomain(), processMonitor.getActivities(), Processes.INVOICES);
         } catch (Exception e) {
             log.error("Error during process execution: ", e);
         }
     }
 
-    private void saveActivities(String tenantDomain, List<Activity> activities) {
+    private void saveActivities(String tenantDomain, List<Activity> activities, String process) {
         for (Activity activity : activities) {
             activity.setTenant(tenantDomain);
+            activity.setProcess(process);
             activityRepository.save(activity);
         }
     }

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.entities.Activity;
 import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,14 +72,16 @@ public class FnCustomers {
             for (int i = 0; i < totalPages; i++) {
                 offset = i * size;
                 JsonNode customerLs = doGetCustomers(tenant, fromTime, size, offset);
-                doCustomerInsert(customerLs, tenant);
+                doCustomerInsert(customerLs, tenant, processMonitor);
             }
         } catch (Exception e) {
+            processMonitor.setSuccessful(false);
             log.error(e.getMessage());
             e.printStackTrace();
         }
         totalPages = 1;
         offset = 0;
+        processMonitor.setSuccessful(true);
         return processMonitor;
     }
 
@@ -104,17 +107,21 @@ public class FnCustomers {
         return FortnoxRequests.doGet(tenant, uri);
     }
 
-    public void doCustomerInsert(JsonNode customerLs, Tenant tenant) {
+    public ProcessMonitor doCustomerInsert(JsonNode customerLs, Tenant tenant, ProcessMonitor processMonitor) {
         for (JsonNode customer : customerLs) {
-            Customers.insertCustomer(customer.get("CustomerNumber").asText(), customer.get("Name").asText(), customer.get("Address1").asText(),
-                    customer.get("Address1").asText(), customer.get("Address2").asText() + " " + customer.get("City").asText(),
-                    customer.get("ZipCode").asText(), tenant);
+            Activity activity = new Activity();
+            activity.setActivity1(customer.toPrettyString());
+            activity = Customers.insertCustomer(customer.get("CustomerNumber").asText(), customer.get("Name").asText(),
+                    customer.get("Address1").asText(), customer.get("Address1").asText(),
+                    customer.get("Address2").asText() + " " + customer.get("City").asText(), customer.get("ZipCode").asText(), tenant, activity);
+            processMonitor.getActivities().add(activity);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        return processMonitor;
     }
 
     public void doSynchroteamCustomersToFortnox(String token, Tenant tenant) {

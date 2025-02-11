@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.entities.Activity;
 import com.entities.Part;
 import com.entities.ProcessMonitor;
 import com.entities.Tenant;
@@ -39,8 +40,11 @@ public class Articles {
                     try {
                         String articleNo = URLEncoder.encode(part.get("ArticleNumber").asText(), "UTF-8");
                         JsonNode partDetails = doGetPartDetails(articleNo, tenant);
+                        Activity activity = new Activity();
+                        activity.setActivity1(partDetails.toPrettyString());
 
-                        doPartsInsert(partDetails, tenant);
+                        activity = doPartsInsert(partDetails, tenant, activity);
+                        processMonitor.getActivities().add(activity);
 
                         JsonNode stockDepots = Warehouses.doStockLevel(tenant, articleNo);
                         for (JsonNode depot : stockDepots) {
@@ -60,12 +64,14 @@ public class Articles {
                     }
                 }
             } catch (Exception e) {
+                processMonitor.setSuccessful(false);
                 log.error(e.getMessage());
             }
             i++;
         }
         totalPages = 1;
         offset = 0;
+        processMonitor.setSuccessful(true);
         return processMonitor;
     }
 
@@ -100,10 +106,11 @@ public class Articles {
         return null;
     }
 
-    public void doPartsInsert(JsonNode part, Tenant tenant) {
-        Parts.insertPart(part.get("ArticleNumber").asText(), part.get("Description").asText(), part.get("SalesPrice").asText(),
+    public Activity doPartsInsert(JsonNode part, Tenant tenant, Activity activity) {
+        activity = Parts.insertPart(part.get("ArticleNumber").asText(), part.get("Description").asText(), part.get("SalesPrice").asText(),
                 part.get("VAT").asText(), part.get("ManufacturerArticleNumber") != null ? part.get("ManufacturerArticleNumber").asText() : "",
-                part.get("Type").asText(), part.get("StockGoods").asBoolean(true), part.get("Active").asBoolean(true), tenant);
+                part.get("Type").asText(), part.get("StockGoods").asBoolean(true), part.get("Active").asBoolean(true), tenant, activity);
+        return activity;
     }
 
     public JsonNode doGetArticles(Tenant tenant, String fromTime, int size) throws JsonMappingException, JsonProcessingException {

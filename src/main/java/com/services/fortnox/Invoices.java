@@ -13,11 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.entities.Activity;
 import com.entities.Part;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repository.PartRepository;
+import com.utils.Utils;
 
 @Service
 public class Invoices {
@@ -30,6 +32,29 @@ public class Invoices {
 	private PartRepository partRepository;
 
 	public ResponseEntity<String> doInvoiceCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant) throws IOException {
+		try {
+			String response = invoiceCreate(map, isInvoice, invoiceMap, tenant, null);
+			if (response != null) {
+				log.info("Successfully created an invoice on Fortnox");
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			}
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			log.error("Error creating invoice: {}", e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	public Activity invoiceOrOrderCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant, Activity activity) throws IOException {
+		String response = invoiceCreate(map, isInvoice, invoiceMap, tenant, activity);
+		if (response != null) {
+			activity.setSuccessful(true);
+			activity.setActivity2(Utils.prettyPrint(response));
+		}
+		return activity;
+	}
+
+	public String invoiceCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant, Activity activity) throws IOException {
 		String uri = isInvoice ? "/3/invoices" : "/3/orders";
 
 		Map<String, Object> newMap = new HashMap<>();
@@ -165,17 +190,7 @@ public class Invoices {
 
 			ObjectMapper mapper = new ObjectMapper();
 			String newjson = mapper.writeValueAsString(invoice);
-			try {
-				String response = FortnoxRequests.doPost(tenant, uri, newjson);
-				if (response != null) {
-					log.info("Successfully created an invoice on Fortnox");
-					return new ResponseEntity<>(response, HttpStatus.OK);
-				}
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			} catch (Exception e) {
-				log.error("Error creating invoice: {}", e.getMessage());
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-			}
+			return FortnoxRequests.doPost(tenant, uri, newjson);
 		}
 
 		return null;
