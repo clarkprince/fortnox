@@ -23,12 +23,6 @@ public class Controller {
 	@Autowired
 	private Invoices invoices;
 
-	@RequestMapping(value = "/activate", method = RequestMethod.GET)
-	public void activateCustomer(@RequestParam("code") String code, @RequestParam("domain") String domain, @RequestParam("apikey") String apikey,
-			jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
-		FortnoxAuth.getAuth(code, false, domain, apikey);
-	}
-
 	@RequestMapping(value = "/fortnox/post", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
 	public ResponseEntity<String> postToFortnox(@RequestParam("domain") String domain, @RequestBody JsonNode data) {
 		try {

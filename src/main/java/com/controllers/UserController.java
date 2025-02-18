@@ -3,20 +3,31 @@ package com.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.dto.LoginRequest;
+import com.dto.LoginResponse;
 import com.entities.User;
 import com.repository.UserRepository;
+import com.utils.JwtUtil;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    private BCryptPasswordEncoder passwordEncoder;
+
+    public UserController() {
+        passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @GetMapping
@@ -53,8 +64,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestParam String email, @RequestParam String password) {
-        return userRepository.findByEmail(email).filter(user -> passwordEncoder.matches(password, user.getPassword())).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        return userRepository.findByEmail(loginRequest.getEmail())
+                .filter(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).map(user -> {
+                    String token = jwtUtil.generateToken(user);
+                    LoginResponse response = new LoginResponse(token, user.getFullName(), user.getEmail());
+                    return ResponseEntity.ok(response);
+                }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 }

@@ -2,6 +2,10 @@ package com.entities;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +28,15 @@ public class Tenant {
     @Column(name = "synchroteam_api_key")
     private String synchroteamAPIKey;
 
+    @JsonIgnore
     @Column(name = "fortnox_token", columnDefinition = "TEXT")
     private String fortnoxToken;
 
+    @Column(name = "tenant_active", columnDefinition = "BOOLEAN DEFAULT FALSE", nullable = false)
+    private boolean tenantActive;
+
+    @JsonProperty("lastSync")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 

@@ -1,12 +1,8 @@
 package com.services.fortnox;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpEntity;
@@ -18,49 +14,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FortnoxAuth {
-
-    public static String getAuth(String code, boolean isRefresh, String domain, String apikey) {
-        String token = null;
-        try {
-            String tenantJson = new String(Files.readAllBytes(Paths.get("tenants.json")));
-            ObjectMapper tenantMapper = new ObjectMapper();
-            JsonNode tenantList = tenantMapper.readTree(tenantJson);
-            List<Map<String, Object>> keys = new ArrayList<Map<String, Object>>();
-
-            for (JsonNode tenant : tenantList) {
-                Map<String, Object> m = tenantMapper.convertValue(tenant, new TypeReference<Map<String, Object>>() {
-                });
-                if (!m.containsKey(domain)) {
-                    keys.add(m);
-                }
-            }
-
-            Map<String, String> tok = doAuth(code, isRefresh);
-            String refreshToken = tok.get("refresh_token");
-            token = tok.get("access_token");
-
-            Map<String, Object> outputTenant = new HashMap<>();
-            outputTenant.put("fortNoxRefreshToken", refreshToken);
-            outputTenant.put("synchroteamAPIKey", apikey);
-            outputTenant.put("synchroteamDomain", domain);
-
-            Map<String, Object> d = new HashMap<>();
-            d.put(domain, outputTenant);
-
-            keys.add(d);
-
-            Files.write(Paths.get("tenants.json"), tenantMapper.writerWithDefaultPrettyPrinter().writeValueAsString(keys).getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return token;
-    }
 
     public static Map<String, String> doAuth(String code, boolean isRefresh) throws IOException {
         Map<String, String> tok = new HashMap<String, String>();

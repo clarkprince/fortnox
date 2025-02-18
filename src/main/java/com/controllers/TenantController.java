@@ -4,21 +4,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.entities.Tenant;
 import com.repository.TenantRepository;
+import com.services.TenantService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tenants")
 public class TenantController {
-    private final TenantRepository tenantRepository;
+    private List<Tenant> cache = new ArrayList<>();
 
-    public TenantController(TenantRepository tenantRepository) {
-        this.tenantRepository = tenantRepository;
-    }
+    @Autowired
+    private TenantRepository tenantRepository;
+
+    @Autowired
+    private TenantService tenantService;
 
     @GetMapping
     public ResponseEntity<List<Tenant>> getAllTenants() {
-        return ResponseEntity.ok(tenantRepository.findAll());
+        List<Tenant> tenants = tenantRepository.findAllOptimised();
+        cache.addAll(tenants);
+        return ResponseEntity.ok(tenants);
     }
 
     @GetMapping("/{id}")
@@ -36,7 +45,8 @@ public class TenantController {
     public ResponseEntity<Tenant> updateTenant(@PathVariable int id, @RequestBody Tenant tenant) {
         return tenantRepository.findById(id).map(existingTenant -> {
             tenant.setId(id);
-            return ResponseEntity.ok(tenantRepository.save(tenant));
+            Tenant updated = tenantRepository.save(tenant);
+            return ResponseEntity.ok(updated);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -46,5 +56,11 @@ public class TenantController {
             tenantRepository.deleteById(id);
             return ResponseEntity.ok().<Void>build();
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateCustomer(@RequestParam("code") String code, @RequestParam("domain") String domain,
+            @RequestParam("apikey") String apikey) {
+        return tenantService.activateTenant(code, domain, apikey) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 }

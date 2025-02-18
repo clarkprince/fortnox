@@ -22,6 +22,8 @@ import com.entities.Activity;
 import com.entities.ProcessMonitor;
 import com.entities.Tenant;
 import com.repository.ActivityRepository;
+import com.repository.ProcessMonitorRepository;
+import com.repository.SettingsRepository;
 import com.repository.TenantRepository;
 import com.services.ProcessMonitorService;
 import com.services.fortnox.Articles;
@@ -58,14 +60,19 @@ public class ProcessManager implements CommandLineRunner {
     @Autowired
     private Articles articlesService;
 
+    @Autowired
+    private SettingsRepository settingsRepository;
+
+    @Autowired
+    private ProcessMonitorRepository processMonitorRepository;
+
     @Override
     public void run(String... args) throws Exception {
         log.info("Starting processes for all tenants...");
         while (true) {
             runProcessesByTenant();
-            // wait for 5 minutes
-            Thread.sleep(300000);
-            // Thread.sleep(3000000);
+            int schedule = settingsRepository.findBySetting("schedule").map(s -> Integer.parseInt(s.getValue())).orElse(300000);
+            Thread.sleep(schedule * 1000);
         }
     }
 
@@ -75,7 +82,7 @@ public class ProcessManager implements CommandLineRunner {
     }
 
     public void runProcessesByTenant() {
-        String fromTime = LocalDateTime.now().minusMinutes(10).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         List<Tenant> tenants = authorisedTenants();
         for (Tenant tenant : tenants) {
             try {
@@ -83,10 +90,10 @@ public class ProcessManager implements CommandLineRunner {
                     continue;
 
                 // Run all processes
-                runCustomerProcess(tenant, fromTime);
-                runPartsProcess(tenant, fromTime);
-                runJobsProcess(tenant, fromTime);
-                runInvoiceProcess(tenant, fromTime);
+                runCustomerProcess(tenant);
+                runPartsProcess(tenant);
+                runJobsProcess(tenant);
+                runInvoiceProcess(tenant);
             } catch (Exception e) {
                 log.error("Error during process execution: ", e);
             }
@@ -94,8 +101,12 @@ public class ProcessManager implements CommandLineRunner {
 
     }
 
-    private void runCustomerProcess(Tenant tenant, String fromTime) {
+    private void runCustomerProcess(Tenant tenant) {
         try {
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.CUSTOMERS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.CUSTOMERS, tenant.getSynchroteamDomain());
             processMonitor = fnCustomersService.getCustomers(tenant, fromTime, 500, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
@@ -105,8 +116,12 @@ public class ProcessManager implements CommandLineRunner {
         }
     }
 
-    private void runPartsProcess(Tenant tenant, String fromTime) {
+    private void runPartsProcess(Tenant tenant) {
         try {
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.PARTS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.PARTS, tenant.getSynchroteamDomain());
             processMonitor = articlesService.getParts(tenant, fromTime, 500, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
@@ -116,8 +131,12 @@ public class ProcessManager implements CommandLineRunner {
         }
     }
 
-    private void runJobsProcess(Tenant tenant, String fromTime) {
+    private void runJobsProcess(Tenant tenant) {
         try {
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.JOBS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.JOBS, tenant.getSynchroteamDomain());
             processMonitor = jobsService.checkingValidatedJobs(tenant, fromTime, 100, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);
@@ -127,8 +146,12 @@ public class ProcessManager implements CommandLineRunner {
         }
     }
 
-    private void runInvoiceProcess(Tenant tenant, String fromTime) {
+    private void runInvoiceProcess(Tenant tenant) {
         try {
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.INVOICES, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.INVOICES, tenant.getSynchroteamDomain());
             processMonitor = synchroInvoicesService.invoiceList(tenant, fromTime, 100, processMonitor);
             processMonitorService.saveOrUpdate(processMonitor);

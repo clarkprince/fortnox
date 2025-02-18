@@ -1,8 +1,8 @@
 package com.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,7 +19,6 @@ import com.utils.Utils;
 
 @RestController
 @RequestMapping("/api/customers")
-@Validated
 public class CustomerController {
 
     @Autowired
@@ -28,7 +27,7 @@ public class CustomerController {
     @Autowired
     private FnCustomers fnCustomers;
 
-    @GetMapping("/list")
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> getCustomerList(@RequestHeader("tenant") String tenantDomain,
             @RequestParam(defaultValue = Constants.DEFAULT_START_DATE) String from, @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "0") int offset) {
@@ -38,7 +37,7 @@ public class CustomerController {
         return customers != null ? ResponseEntity.ok(Utils.prettyPrint(customers)) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> getCustomerDetails(@PathVariable String id, @RequestHeader("tenant") String tenantDomain) {
 
         Tenant tenant = tenantService.getTenantByDomain(tenantDomain);

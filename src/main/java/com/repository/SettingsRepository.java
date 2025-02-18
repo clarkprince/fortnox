@@ -1,16 +1,19 @@
 package com.repository;
 
-import com.entities.Settings;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.entities.Settings;
+
 @Repository
 public interface SettingsRepository extends JpaRepository<Settings, Integer> {
-    List<Settings> findByTenant(String tenant);
+    @Query("SELECT s FROM Settings s")
+    List<Settings> findAllOptimised();
 
-    List<Settings> findByTenantAndSection(String tenant, String section);
-
-    Optional<Settings> findByTenantAndSetting(String tenant, String setting);
+    @Query("SELECT s FROM Settings s WHERE s.setting = :setting")
+    Optional<Settings> findBySetting(String setting);
 }

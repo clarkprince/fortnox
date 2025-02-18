@@ -10,6 +10,7 @@ import com.services.TenantService;
 import com.services.synchroteam.Jobs;
 import com.utils.Utils;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -21,7 +22,7 @@ public class JobController {
     @Autowired
     private TenantService tenantService;
 
-    @GetMapping("/validated")
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<?> getValidatedJobs(@RequestHeader("tenant") String tenantDomain,
             @RequestParam(defaultValue = Constants.DEFAULT_START_DATE) String from, @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "1") int page) {
@@ -31,7 +32,7 @@ public class JobController {
         return jobs != null ? ResponseEntity.ok(Utils.prettyPrint(jobs)) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> getJobDetails(@PathVariable String id, @RequestHeader("tenant") String tenantDomain) {
 
         Tenant tenant = tenantService.getTenantByDomain(tenantDomain);

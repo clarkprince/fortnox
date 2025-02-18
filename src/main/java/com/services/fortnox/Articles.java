@@ -95,13 +95,18 @@ public class Articles {
         }
     }
 
-    public JsonNode doGetPartDetails(String id, Tenant tenant) throws JsonMappingException, JsonProcessingException {
-        String uri = "/3/articles/" + id;
-        String response = FortnoxRequests.doGet(tenant, uri);
-        if (response != null) {
-            ObjectMapper responseMapper = new ObjectMapper();
-            JsonNode resposeTree = responseMapper.readTree(response);
-            return resposeTree.get("Article");
+    public JsonNode doGetPartDetails(String id, Tenant tenant) {
+        try {
+            String uri = "/3/articles/" + id;
+            String response = FortnoxRequests.doGet(tenant, uri);
+            if (response != null) {
+                ObjectMapper responseMapper = new ObjectMapper();
+                JsonNode resposeTree = responseMapper.readTree(response);
+                return resposeTree.get("Article");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -114,8 +119,7 @@ public class Articles {
     }
 
     public JsonNode doGetArticles(Tenant tenant, String fromTime, int size) throws JsonMappingException, JsonProcessingException {
-        String uri = "/3/articles?limit=" + size + "&lastmodified=" + fromTime + "&offset=" + offset;
-        String response = FortnoxRequests.doGet(tenant, uri);
+        String response = requestArticles(tenant, fromTime, size, offset);
         if (response != null) {
             ObjectMapper responseMapper = new ObjectMapper();
             JsonNode resposeTree = responseMapper.readTree(response);
@@ -124,5 +128,10 @@ public class Articles {
             return resposeTree.get("Articles");
         }
         return null;
+    }
+
+    public String requestArticles(Tenant tenant, String fromTime, int size, int offset) {
+        String uri = "/3/articles?limit=" + size + "&lastmodified=" + fromTime + "&offset=" + offset;
+        return FortnoxRequests.doGet(tenant, uri);
     }
 }
