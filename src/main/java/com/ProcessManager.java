@@ -1,6 +1,5 @@
 package com;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -105,7 +104,7 @@ public class ProcessManager implements CommandLineRunner {
         try {
             String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.CUSTOMERS, tenant.getSynchroteamDomain())
                     .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.CUSTOMERS, tenant.getSynchroteamDomain());
             processMonitor = fnCustomersService.getCustomers(tenant, fromTime, 500, processMonitor);
@@ -120,7 +119,7 @@ public class ProcessManager implements CommandLineRunner {
         try {
             String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.PARTS, tenant.getSynchroteamDomain())
                     .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.PARTS, tenant.getSynchroteamDomain());
             processMonitor = articlesService.getParts(tenant, fromTime, 500, processMonitor);
