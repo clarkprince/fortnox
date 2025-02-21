@@ -163,9 +163,11 @@ public class ProcessManager implements CommandLineRunner {
 
     private void saveActivities(String tenantDomain, List<Activity> activities, String process) {
         for (Activity activity : activities) {
-            activity.setTenant(tenantDomain);
-            activity.setProcess(process);
-            activityRepository.save(activity);
+            if (!activityRepository.existsByActivity1(activity.getActivity1())) {
+                activity.setTenant(tenantDomain);
+                activity.setProcess(process);
+                activityRepository.save(activity);
+            }
         }
     }
 

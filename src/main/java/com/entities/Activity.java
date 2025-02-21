@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "activities")
+@Table(name = "activities", indexes = { @Index(name = "idx_activities_tenant", columnList = "tenant"),
+        @Index(name = "idx_activities_created_at", columnList = "created_at"), @Index(name = "idx_activities_process", columnList = "process"),
+        @Index(name = "idx_activities_tenant_created_at", columnList = "tenant,created_at"),
+        @Index(name = "idx_activities_tenant_process_created_at", columnList = "tenant,process,created_at") })
 @Getter
 @Setter
 public class Activity {
@@ -21,7 +24,7 @@ public class Activity {
     @Column(name = "activity2", columnDefinition = "TEXT")
     private String activity2;
 
-    @Column(name = "process", columnDefinition = "TEXT")
+    @Column(name = "process", columnDefinition = "varchar(255) DEFAULT NULL")
     private String process;
 
     @Column(name = "successful", columnDefinition = "BOOLEAN DEFAULT FALSE")

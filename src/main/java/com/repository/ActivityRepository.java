@@ -52,4 +52,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
         Page<Activity> findBySearchTermAndTenantAndProcessAndCreatedAtBetween(@Param("search") String search, @Param("tenant") String tenant,
                         @Param("process") String process, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate,
                         Pageable pageable);
+
+        @Query("SELECT COUNT(a) > 0 FROM Activity a WHERE a.activity1 = :activity1")
+        boolean existsByActivity1(@Param("activity1") String activity1);
 }
