@@ -24,7 +24,13 @@ public class SettingsController {
     @PostMapping
     public ResponseEntity<Void> updateSettings(@RequestBody List<Settings> settings) {
         try {
-            settingsRepository.saveAll(settings);
+            for (Settings setting : settings) {
+                settingsRepository.findBySetting(setting.getSetting()).ifPresentOrElse(existingSetting -> {
+                    existingSetting.setValue(setting.getValue());
+                    existingSetting.setSection(setting.getSection());
+                    settingsRepository.save(existingSetting);
+                }, () -> settingsRepository.save(setting));
+            }
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

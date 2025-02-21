@@ -21,7 +21,7 @@ public class TenantService {
     }
 
     public boolean activateTenant(String code, String domain, String apikey) {
-        Tenant tenant = tenantRepository.findBySynchroteamDomain(domain).orElse(null);
+        Tenant tenant = tenantRepository.findBySynchroteamDomain(domain.toLowerCase()).orElse(null);
         if (tenant == null) {
             tenant = new Tenant();
         }
@@ -29,7 +29,7 @@ public class TenantService {
             Map<String, String> auth = FortnoxAuth.doAuth(code, false);
             tenant.setFortnoxToken(auth.get("access_token"));
             tenant.setFortNoxRefreshToken(auth.get("refresh_token"));
-            tenant.setSynchroteamDomain(domain);
+            tenant.setSynchroteamDomain(domain.toLowerCase());
             tenant.setSynchroteamAPIKey(apikey);
             tenant.setTenantActive(true);
             tenantRepository.save(tenant);

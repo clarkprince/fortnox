@@ -176,12 +176,9 @@ public class ProcessManager implements CommandLineRunner {
         List<Tenant> aTenants = tenantRepository.findAll();
         for (Tenant tenant : aTenants) {
             try {
-                if (tenant.getSynchroteamDomain().equalsIgnoreCase("workwitsolution")) { // ************
-
-                    Tenant aTenant = doFortnoxAuth(tenant);
-                    if (aTenant != null) {
-                        tenants.add(aTenant);
-                    }
+                Tenant aTenant = doFortnoxAuth(tenant);
+                if (aTenant != null && aTenant.isTenantActive()) {
+                    tenants.add(aTenant);
                 }
             } catch (Exception e) {
                 log.error("Error: ", e);
@@ -196,11 +193,12 @@ public class ProcessManager implements CommandLineRunner {
             Map<String, String> auth = FortnoxAuth.doAuth(tenant.getFortNoxRefreshToken(), true);
             tenant.setFortnoxToken(auth.get("access_token"));
             tenant.setFortNoxRefreshToken(auth.get("refresh_token"));
-            tenantRepository.save(tenant);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            tenant.setTenantActive(false);
             log.error("Error: ", e);
             e.printStackTrace();
         }
+        tenantRepository.save(tenant);
         return tenant;
     }
 
