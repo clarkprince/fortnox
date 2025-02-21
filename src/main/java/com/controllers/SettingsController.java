@@ -28,6 +28,7 @@ public class SettingsController {
                 settingsRepository.findBySetting(setting.getSetting()).ifPresentOrElse(existingSetting -> {
                     existingSetting.setValue(setting.getValue());
                     existingSetting.setSection(setting.getSection());
+                    existingSetting.setTenant(setting.getTenant());
                     settingsRepository.save(existingSetting);
                 }, () -> settingsRepository.save(setting));
             }
