@@ -19,6 +19,7 @@ import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repository.PartRepository;
+import com.repository.SettingsRepository;
 import com.utils.Utils;
 
 @Service
@@ -30,6 +31,15 @@ public class Invoices {
 
 	@Autowired
 	private PartRepository partRepository;
+
+	@Autowired
+	private SettingsRepository settingsRepository;
+
+	private boolean shouldSkipJobWithNoParts(String tenant, JsonNode map) {
+		return settingsRepository.findBySetting("excludeJobsWithNoParts")
+				.map(setting -> "true".equalsIgnoreCase(setting.getValue()) && (map.get("parts") == null || map.get("parts").size() == 0))
+				.orElse(false);
+	}
 
 	public ResponseEntity<String> doInvoiceCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant) throws IOException {
 		try {
@@ -55,6 +65,16 @@ public class Invoices {
 	}
 
 	public String invoiceCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant, Activity activity) throws IOException {
+		// Check if we should skip jobs with no parts
+		if (shouldSkipJobWithNoParts(tenant.getSynchroteamDomain(), map)) {
+			log.info("Skipping job with no parts due to excludeJobsWithNoParts setting");
+			if (activity != null) {
+				activity.setSuccessful(true);
+				activity.setMessage("Skipped - No parts and excludeJobsWithNoParts is enabled");
+			}
+			return null;
+		}
+
 		String uri = isInvoice ? "/3/invoices" : "/3/orders";
 
 		Map<String, Object> newMap = new HashMap<>();

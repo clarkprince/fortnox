@@ -16,4 +16,7 @@ public interface SettingsRepository extends JpaRepository<Settings, Integer> {
 
     @Query("SELECT s FROM Settings s WHERE s.setting = :setting")
     Optional<Settings> findBySetting(String setting);
+
+    @Query("SELECT s FROM Settings s WHERE s.tenant = :tenant")
+    List<Settings> findByTenant(String tenant);
 }

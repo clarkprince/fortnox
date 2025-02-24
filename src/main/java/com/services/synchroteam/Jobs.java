@@ -20,6 +20,7 @@ import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repository.JobsHistoryRepository;
+import com.repository.SettingsRepository;
 import com.services.fortnox.Invoices;
 import com.utils.Utils;
 
@@ -36,55 +37,79 @@ public class Jobs {
 	@Autowired
 	private Invoices fortnoxInvoices;
 
+	@Autowired
+	private SettingsRepository settingsRepository;
+
+	private boolean shouldProcessCompletedJobs(Tenant tenant) {
+		return settingsRepository.findBySetting("sendCompletedJobs").map(setting -> "true".equalsIgnoreCase(setting.getValue())).orElse(false);
+	}
+
 	public ProcessMonitor checkingValidatedJobs(Tenant tenant, String fromTime, int pageSize, ProcessMonitor processMonitor) {
-		log.info("Retrieving validated jobs");
+		log.info("Retrieving validated and completed jobs");
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-			log.info("Retrieving list of validated jobs");
-			int totalPages = 1;
-			int page = 1;
+			// Process validated jobs
+			processJobsByStatus(tenant, fromTime, pageSize, "validated", mapper, processMonitor);
 
-			do {
-				String response = requestJobs(tenant, fromTime, pageSize, page);
+			// Process completed jobs if enabled
+			if (shouldProcessCompletedJobs(tenant)) {
+				processJobsByStatus(tenant, fromTime, pageSize, "completed", mapper, processMonitor);
+			}
 
-				if (response != null) {
-					JsonNode root = mapper.readTree(response);
-					totalPages = (int) Math.ceil(root.get("recordsTotal").asInt() / pageSize);
-					JsonNode jobNode = root.get("data");
-
-					if (jobNode.size() > 0) {
-						for (JsonNode j : jobNode) {
-
-							String myId = j.get("id").asText();
-							if (!Utils.isEmpty(myId)) {
-								JobsHistory existingJob = jobsHistoryRepository.findById(myId).orElse(null);
-								if (existingJob == null) {
-									Activity activity = new Activity();
-									JsonNode map = retrieveJob(myId, tenant);
-									activity.setActivity1(map.toPrettyString());
-									sendAndSaveJob(myId, map, tenant, activity);
-									processMonitor.getActivities().add(activity);
-								}
-							}
-						}
-					}
-				}
-
-				page++;
-			} while (page <= totalPages);
 			log.info("Successfully ran job retrieval process");
+			processMonitor.setSuccessful(true);
 		} catch (Exception e) {
 			processMonitor.setSuccessful(false);
 			log.error(e.getMessage());
 			e.printStackTrace();
 		}
-		processMonitor.setSuccessful(true);
 		return processMonitor;
 	}
 
+	private void processJobsByStatus(Tenant tenant, String fromTime, int pageSize, String status, ObjectMapper mapper, ProcessMonitor processMonitor)
+			throws Exception {
+		log.info("Retrieving {} jobs", status);
+		int totalPages = 1;
+		int page = 1;
+
+		do {
+			String response = requestJobs(tenant, fromTime, pageSize, page, status);
+
+			if (response != null) {
+				JsonNode root = mapper.readTree(response);
+				totalPages = (int) Math.ceil(root.get("recordsTotal").asInt() / pageSize);
+				JsonNode jobNode = root.get("data");
+
+				if (jobNode.size() > 0) {
+					for (JsonNode j : jobNode) {
+						String myId = j.get("id").asText();
+						if (!Utils.isEmpty(myId)) {
+							JobsHistory existingJob = jobsHistoryRepository.findById(myId).orElse(null);
+							if (existingJob == null) {
+								Activity activity = new Activity();
+								JsonNode map = retrieveJob(myId, tenant);
+								activity.setActivity1(map.toPrettyString());
+								sendAndSaveJob(myId, map, tenant, activity);
+								processMonitor.getActivities().add(activity);
+							}
+						}
+					}
+				}
+			}
+			page++;
+		} while (page <= totalPages);
+	}
+
 	public String requestJobs(Tenant tenant, String fromTime, int pageSize, int page) {
-		String uri = API_BASE_URL + "/job/list?status=validated&pageSize=" + pageSize + "&validatedSince=" + fromTime + "&page=" + page;
+		return requestJobs(tenant, fromTime, pageSize, page, "validated");
+	}
+
+	public String requestJobs(Tenant tenant, String fromTime, int pageSize, int page, String status) {
+		String uri = API_BASE_URL + "/job/list?status=" + status + "&pageSize=" + pageSize + "&validatedSince=" + fromTime + "&page=" + page;
+		if (status.equalsIgnoreCase("completed")) {
+			uri = API_BASE_URL + "/job/list?status=completed&dateFrom=" + fromTime + "&pageSize=" + pageSize + "&page=" + page;
+		}
 		return SynchroRequests.doGet(tenant, uri);
 	}
 
