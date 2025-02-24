@@ -73,7 +73,7 @@ public class TenantController {
             settings.forEach(setting -> {
                 setting.setTenant(tenant.getSynchroteamDomain());
                 setting.setSection(Constants.SECTION_GENERAL);
-                settingsRepository.findBySetting(setting.getSetting()).ifPresentOrElse(existingSetting -> {
+                settingsRepository.findBySettingAndTenant(setting.getSetting(), tenant.getSynchroteamDomain()).ifPresentOrElse(existingSetting -> {
                     existingSetting.setValue(setting.getValue());
                     existingSetting.setSection(setting.getSection());
                     settingsRepository.save(existingSetting);

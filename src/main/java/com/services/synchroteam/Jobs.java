@@ -41,7 +41,8 @@ public class Jobs {
 	private SettingsRepository settingsRepository;
 
 	private boolean shouldProcessCompletedJobs(Tenant tenant) {
-		return settingsRepository.findBySetting("sendCompletedJobs").map(setting -> "true".equalsIgnoreCase(setting.getValue())).orElse(false);
+		return settingsRepository.findBySettingAndTenant("sendCompletedJobs", tenant.getSynchroteamDomain())
+				.map(setting -> "true".equalsIgnoreCase(setting.getValue())).orElse(false);
 	}
 
 	public ProcessMonitor checkingValidatedJobs(Tenant tenant, String fromTime, int pageSize, ProcessMonitor processMonitor) {

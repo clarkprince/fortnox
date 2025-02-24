@@ -36,7 +36,7 @@ public class Invoices {
 	private SettingsRepository settingsRepository;
 
 	private boolean shouldSkipJobWithNoParts(String tenant, JsonNode map) {
-		return settingsRepository.findBySetting("excludeJobsWithNoParts")
+		return settingsRepository.findBySettingAndTenant("excludeJobsWithNoParts", tenant)
 				.map(setting -> "true".equalsIgnoreCase(setting.getValue()) && (map.get("parts") == null || map.get("parts").size() == 0))
 				.orElse(false);
 	}
