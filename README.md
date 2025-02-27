@@ -1,4 +1,4 @@
-# Fortnox Integration Service
+# Workwit Synchroteam-Fortnox Integration Service
 
 A Spring Boot REST API service that integrates Fortnox with other systems.
 
