@@ -66,7 +66,7 @@ public class Invoices {
 
 	public String invoiceCreate(JsonNode map, boolean isInvoice, JsonNode invoiceMap, Tenant tenant, Activity activity) throws IOException {
 		// Check if we should skip jobs with no parts
-		if (shouldSkipJobWithNoParts(tenant.getSynchroteamDomain(), map)) {
+		if (!isInvoice && shouldSkipJobWithNoParts(tenant.getSynchroteamDomain(), map)) {
 			log.info("Skipping job with no parts due to excludeJobsWithNoParts setting");
 			if (activity != null) {
 				activity.setSuccessful(true);

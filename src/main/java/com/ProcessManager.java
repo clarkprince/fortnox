@@ -65,6 +65,8 @@ public class ProcessManager implements CommandLineRunner {
     @Autowired
     private ProcessMonitorRepository processMonitorRepository;
 
+    private boolean isAuthProcessRunning = false;
+
     @Override
     public void run(String... args) throws Exception {
         log.info("Starting processes for all tenants...");
@@ -75,14 +77,30 @@ public class ProcessManager implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void processMonitor() {
-        // log.info("Starting process monitor...");
+        log.info("Starting token refresh...");
+        try {
+            isAuthProcessRunning = true;
+            authorisedTenants();
+        } catch (Exception e) {
+            log.error("Error during token refresh: ", e);
+        } finally {
+            isAuthProcessRunning = false;
+        }
+        log.info("Token refresh completed for all tenants.");
     }
 
     public void runProcessesByTenant() {
-
-        List<Tenant> tenants = authorisedTenants();
+        if (isAuthProcessRunning) {
+            try {
+                log.info("Auth process is running, waiting for it to finish...");
+                Thread.sleep(60 * 1000); // Wait for the auth process to finish
+            } catch (Exception e) {
+                log.error("Error while waiting for auth process to finish: ", e);
+            }
+        }
+        List<Tenant> tenants = tenantRepository.findAll();
         for (Tenant tenant : tenants) {
             try {
                 if (!validTenant(tenant))
@@ -97,7 +115,6 @@ public class ProcessManager implements CommandLineRunner {
                 log.error("Error during process execution: ", e);
             }
         }
-
     }
 
     private void runCustomerProcess(Tenant tenant) {
@@ -189,12 +206,14 @@ public class ProcessManager implements CommandLineRunner {
 
     private Tenant doFortnoxAuth(Tenant tenant) {
         try {
+            log.info("Authorising tenant: " + tenant.getSynchroteamDomain());
             Map<String, String> auth = FortnoxAuth.doAuth(tenant.getFortNoxRefreshToken(), true);
             tenant.setFortnoxToken(auth.get("access_token"));
             tenant.setFortNoxRefreshToken(auth.get("refresh_token"));
+            log.info("Successfully authorised tenant: " + tenant.getSynchroteamDomain());
         } catch (Exception e) {
             tenant.setTenantActive(false);
-            log.error("Error: ", e);
+            log.error("Error authorising tenant: " + tenant.getSynchroteamDomain(), e);
             e.printStackTrace();
         }
         tenantRepository.save(tenant);
