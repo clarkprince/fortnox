@@ -2,10 +2,12 @@ package com.services.synchroteam;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dto.PartPriceUpdateDTO;
 import com.entities.Activity;
 import com.entities.Tenant;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,4 +57,50 @@ public class Parts {
         return activity;
     }
 
+    public static String getParts(Tenant tenant) {
+        try {
+            String uri = "https://ws.synchroteam.com/api/v3/part/list";
+            String response = SynchroRequests.doGet(tenant, uri);
+
+            if (response != null) {
+                log.info("Parts list successfully retrieved.");
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Failed to retrieve parts list: " + e);
+        }
+        return null;
+    }
+
+    public static String getPart(Tenant tenant, String id) {
+        try {
+            String uri = "https://ws.synchroteam.com/api/v3/part/details?id=" + id;
+            String response = SynchroRequests.doGet(tenant, uri);
+
+            if (response != null) {
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Failed to retrieve part details for ID " + id + ": " + e);
+        }
+        return null;
+    }
+
+    public static Activity updatePartPrices(List<PartPriceUpdateDTO> prices, Tenant tenant, Activity activity) {
+        try {
+            String json = new ObjectMapper().writeValueAsString(prices);
+            String uri = "https://ws.synchroteam.com/api/v3/part/prices";
+            String response = SynchroRequests.doPost(tenant, uri, json);
+
+            if (response != null) {
+                log.info("Part prices successfully updated.");
+                activity.setSuccessful(true);
+                activity.setActivity2(Utils.prettyPrint(response));
+            }
+        } catch (Exception e) {
+            log.error("Failed to update part prices: " + e);
+            activity.setSuccessful(false);
+        }
+        return activity;
+    }
 }

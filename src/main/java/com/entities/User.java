@@ -33,6 +33,13 @@ public class User {
 
     private String password;
 
+    private String tenant;
+
+    @Column(columnDefinition = "int DEFAULT 1")
+    private String role;
+
+    private boolean active;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 

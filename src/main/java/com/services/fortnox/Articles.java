@@ -134,4 +134,32 @@ public class Articles {
         String uri = "/3/articles?limit=" + size + "&lastmodified=" + fromTime + "&offset=" + offset;
         return FortnoxRequests.doGet(tenant, uri);
     }
+
+    public Activity reprocessArticle(String articleNumber, Tenant tenant, Activity activity) {
+        try {
+            JsonNode article = doGetPartDetails(articleNumber, tenant);
+            if (article != null) {
+                activity.setActivity1(article.toPrettyString());
+                activity = doPartsInsert(article, tenant, activity);
+
+                // Update stock levels if necessary
+                if (article.get("StockGoods").asBoolean(false)) {
+                    JsonNode stockDepots = Warehouses.doStockLevel(tenant, articleNumber);
+                    for (JsonNode depot : stockDepots) {
+                        if (depot.get("stockPointCode") != null) {
+                            Depots.insertToDepot(depot.get("stockPointCode").asText(), articleNumber, depot.get("availableStock").asInt(0), tenant);
+                        }
+                    }
+                }
+
+                // Save to database
+                savePartToDatabase(article, tenant.getSynchroteamDomain());
+            }
+        } catch (Exception e) {
+            activity.setSuccessful(false);
+            activity.setMessage("Failed to reprocess article: " + e.getMessage());
+            log.error("Failed to reprocess article {}: {}", articleNumber, e.getMessage());
+        }
+        return activity;
+    }
 }

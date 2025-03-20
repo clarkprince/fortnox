@@ -29,7 +29,6 @@ public class Jobs {
 
 	private static final Logger log = LoggerFactory.getLogger(Jobs.class);
 	private static final String API_BASE_URL = "https://ws.synchroteam.com/api/v3";
-	private static final String EGEEID_FIELD = "EGEEID";
 
 	@Autowired
 	private JobsHistoryRepository jobsHistoryRepository;
@@ -146,6 +145,21 @@ public class Jobs {
 		return activity;
 	}
 
+	public Activity reprocessJob(String jobId, Tenant tenant, Activity activity) {
+		try {
+			JsonNode job = retrieveJob(jobId, tenant);
+			if (job != null) {
+				activity.setActivity1(job.toPrettyString());
+				activity = sendAndSaveJob(jobId, job, tenant, activity);
+			}
+		} catch (Exception e) {
+			activity.setSuccessful(false);
+			activity.setMessage("Failed to reprocess job: " + e.getMessage());
+			log.error("Failed to reprocess job {}: {}", jobId, e.getMessage());
+		}
+		return activity;
+	}
+
 	public String getFieldFromUser(String id, Tenant tenant) {
 		log.info("Retrieving user-" + id);
 
@@ -159,7 +173,7 @@ public class Jobs {
 				if (userNode.size() > 0) {
 					for (JsonNode j : userNode) {
 						String label = j.get("label").textValue();
-						if (!Utils.isEmpty(label) && label.equalsIgnoreCase(EGEEID_FIELD)) {
+						if (!Utils.isEmpty(label) && label.equalsIgnoreCase("EGEEID")) {
 							return j.get("value").textValue();
 						}
 					}
@@ -170,21 +184,6 @@ public class Jobs {
 			log.info("User not found.");
 		}
 		return "";
-	}
-
-	public boolean jobExists(String id, Tenant tenant) {
-		try {
-			String uri = API_BASE_URL + "/job/details?myId=" + id;
-			String response = SynchroRequests.doGet(tenant, uri);
-
-			if (response != null) {
-				return true;
-			}
-
-			return false;
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 	public void insertJob(String myId, String description, String custMyId, String equipmentId, String address1, String address2, String address3,

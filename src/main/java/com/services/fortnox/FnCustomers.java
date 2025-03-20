@@ -111,9 +111,7 @@ public class FnCustomers {
         for (JsonNode customer : customerLs) {
             Activity activity = new Activity();
             activity.setActivity1(customer.toPrettyString());
-            activity = Customers.insertCustomer(customer.get("CustomerNumber").asText(), customer.get("Name").asText(),
-                    customer.get("Address1").asText(), customer.get("Address1").asText(),
-                    customer.get("Address2").asText() + " " + customer.get("City").asText(), customer.get("ZipCode").asText(), tenant, activity);
+            activity = createSynchroteamCustomer(customer, tenant, activity);
             processMonitor.getActivities().add(activity);
             try {
                 Thread.sleep(1000);
@@ -122,6 +120,19 @@ public class FnCustomers {
             }
         }
         return processMonitor;
+    }
+
+    private Activity createSynchroteamCustomer(JsonNode customer, Tenant tenant, Activity activity) {
+        String customerNumber = customer.get("CustomerNumber").asText();
+        String name = customer.get("Name").asText();
+        String address1 = customer.get("Address1").asText();
+        String address2 = customer.get("Address2").asText();
+        String city = customer.get("City").asText();
+        String zipCode = customer.get("ZipCode").asText();
+
+        String formattedAddress2 = address2 + " " + city;
+
+        return Customers.insertCustomer(customerNumber, name, address1, address1, formattedAddress2, zipCode, tenant, activity);
     }
 
     public void doSynchroteamCustomersToFortnox(String token, Tenant tenant) {
@@ -150,5 +161,20 @@ public class FnCustomers {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public Activity reprocessCustomer(String customerNumber, Tenant tenant, Activity activity) {
+        try {
+            JsonNode customer = doGetSingleCustomer(tenant, customerNumber);
+            if (customer != null) {
+                activity.setActivity1(customer.toPrettyString());
+                activity = createSynchroteamCustomer(customer, tenant, activity);
+            }
+        } catch (Exception e) {
+            activity.setSuccessful(false);
+            activity.setMessage("Failed to reprocess customer: " + e.getMessage());
+            log.error("Failed to reprocess customer {}: {}", customerNumber, e.getMessage());
+        }
+        return activity;
     }
 }

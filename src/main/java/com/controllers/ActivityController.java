@@ -1,13 +1,19 @@
 package com.controllers;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,13 +22,38 @@ import org.springframework.web.bind.annotation.RestController;
 import com.constants.Constants;
 import com.dto.PaginatedResponse;
 import com.entities.Activity;
+import com.entities.Tenant;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repository.ActivityRepository;
+import com.services.TenantService;
+import com.services.fortnox.Articles;
+import com.services.fortnox.FnCustomers;
+import com.services.synchroteam.Jobs;
+import com.services.synchroteam.SynchroInvoices;
 import com.utils.Utils;
 
 @RestController
 @RequestMapping("/api/activities")
 public class ActivityController {
     private final ActivityRepository activityRepository;
+
+    private final Logger log = LoggerFactory.getLogger(ActivityController.class);
+
+    @Autowired
+    private Jobs jobsService;
+
+    @Autowired
+    private SynchroInvoices synchroInvoicesService;
+
+    @Autowired
+    private TenantService tenantService;
+
+    @Autowired
+    private Articles articlesService;
+
+    @Autowired
+    private FnCustomers fnCustomersService;
 
     public ActivityController(ActivityRepository activityRepository) {
         this.activityRepository = activityRepository;
@@ -64,6 +95,50 @@ public class ActivityController {
         }
 
         return ResponseEntity.ok(PaginatedResponse.from(pageResult));
+    }
+
+    @PostMapping("/rerun")
+    public ResponseEntity<?> rerunActivities(@RequestBody List<Long> activityIds,
+            @RequestHeader(value = "tenant", required = true) String tenantDomain) {
+
+        for (Long id : activityIds) {
+            Activity activity = activityRepository.findById(id).orElse(null);
+            if (activity != null && activity.getActivity1() != null) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode jsonNode = mapper.readTree(activity.getActivity1());
+
+                    Tenant tenant = tenantService.getTenantByDomain(tenantDomain);
+                    Activity activityToUpdate = new Activity();
+                    activityToUpdate.setId(activity.getId());
+                    activityToUpdate.setProcess(activity.getProcess());
+                    activityToUpdate.setTenant(tenant.getSynchroteamDomain());
+
+                    switch (activity.getProcess()) {
+                    case "jobs":
+                        activityToUpdate = jobsService.reprocessJob(jsonNode.get("id").asText(), tenant, activity);
+                        break;
+                    case "invoices":
+                        activityToUpdate = synchroInvoicesService.reprocessInvoice(jsonNode.get("id").asText(), tenant, activity);
+                        break;
+                    case "parts":
+                        activityToUpdate = articlesService.reprocessArticle(jsonNode.get("ArticleNumber").asText(), tenant, activity);
+                        break;
+                    case "customers":
+                        activityToUpdate = fnCustomersService.reprocessCustomer(jsonNode.get("CustomerNumber").asText(), tenant, activity);
+                        break;
+                    default:
+                        log.error("Unknown process type: {}", activity.getProcess());
+                        continue;
+                    }
+
+                    activityRepository.save(activityToUpdate);
+                } catch (Exception e) {
+                    log.error("Failed to rerun activity {}: {}", id, e.getMessage());
+                }
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")

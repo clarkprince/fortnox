@@ -113,4 +113,21 @@ public class SynchroInvoices {
 		}
 		return activity;
 	}
+
+	public Activity reprocessInvoice(String invoiceId, Tenant tenant, Activity activity) {
+		try {
+			JsonNode invoice = retrieveInvoice(invoiceId, tenant);
+			if (invoice != null) {
+				activity.setActivity1(invoice.toPrettyString());
+				String jobId = invoice.get("job").get("id").asText();
+				JsonNode job = jobsService.retrieveJob(jobId, tenant);
+				activity = sendAndSaveInvoice(invoiceId, job, invoice, tenant, activity);
+			}
+		} catch (Exception e) {
+			activity.setSuccessful(false);
+			activity.setMessage("Failed to reprocess invoice: " + e.getMessage());
+			log.error("Failed to reprocess invoice {}: {}", invoiceId, e.getMessage());
+		}
+		return activity;
+	}
 }
