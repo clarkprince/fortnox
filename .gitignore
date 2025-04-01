@@ -8,3 +8,4 @@
 *.json
 *.properties
 app.log*
+pom copy.xml

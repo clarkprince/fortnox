@@ -103,7 +103,7 @@ public class UserController {
         return userRepository.findByEmail(loginRequest.getEmail())
                 .filter(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).map(user -> {
                     String token = jwtUtil.generateToken(user);
-                    LoginResponse response = new LoginResponse(token, user.getFullName(), user.getEmail(), user.getRole());
+                    LoginResponse response = new LoginResponse(token, user.getFullName(), user.getEmail(), user.getRole(), user.getTenant());
                     return ResponseEntity.ok(response);
                 }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }

@@ -5,12 +5,14 @@ public class LoginResponse {
     private String name;
     private String email;
     private String role;
+    private String tenant;
 
-    public LoginResponse(String token, String name, String email, String role) {
+    public LoginResponse(String token, String name, String email, String role, String tenant) {
         this.token = token;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.tenant = tenant;
     }
 
     // Getters and setters
@@ -44,5 +46,13 @@ public class LoginResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
     }
 }
