@@ -192,9 +192,11 @@ public class ProcessManager implements CommandLineRunner {
         List<Tenant> aTenants = tenantRepository.findAll();
         for (Tenant tenant : aTenants) {
             try {
-                Tenant aTenant = doFortnoxAuth(tenant);
-                if (aTenant != null && aTenant.isTenantActive()) {
-                    tenants.add(aTenant);
+                if (validTenant(tenant)) {
+                    Tenant aTenant = doFortnoxAuth(tenant);
+                    if (aTenant != null && aTenant.isTenantActive()) {
+                        tenants.add(aTenant);
+                    }
                 }
             } catch (Exception e) {
                 log.error("Error: ", e);
@@ -221,8 +223,8 @@ public class ProcessManager implements CommandLineRunner {
     }
 
     private boolean validTenant(Tenant tenant) {
-        if (tenant.getFortnoxToken() == null) {
-            log.error("Token not found");
+        if (tenant.getFortnoxToken() == null || tenant.getFortnoxToken().isEmpty() || tenant.getFortNoxRefreshToken() == null
+                || tenant.getFortNoxRefreshToken().isEmpty()) {
             return false;
         }
         return true;

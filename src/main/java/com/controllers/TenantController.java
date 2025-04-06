@@ -52,7 +52,9 @@ public class TenantController {
 
     @PostMapping
     public ResponseEntity<Tenant> createTenant(@RequestBody TenantDTO tenantDTO) {
-        Tenant savedTenant = tenantRepository.save(tenantDTO.getTenant());
+        Tenant tenant = tenantDTO.getTenant();
+        tenant.setTenantActive(true);
+        Tenant savedTenant = tenantRepository.save(tenant);
         saveSettings(tenantDTO.getSettings(), savedTenant);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTenant);
     }

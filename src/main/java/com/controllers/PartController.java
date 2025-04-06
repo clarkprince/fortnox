@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.constants.Constants;
+import com.dto.PartDTO;
 import com.dto.PartPriceUpdateDTO;
 import com.entities.Activity;
 import com.entities.Tenant;
@@ -57,16 +58,24 @@ public class PartController {
     }
 
     @GetMapping(value = "/synchroteam/list", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
-    public ResponseEntity<String> getSynchroteamParts(@RequestHeader("tenant") String tenantDomain) {
+    public ResponseEntity<String> getSynchroteamParts(@RequestHeader("tenant") String tenantDomain, @RequestParam(defaultValue = "100") int size,
+            @RequestParam(defaultValue = "1") int page) {
         Tenant tenant = tenantService.getTenantByDomain(tenantDomain);
-        String parts = Parts.getParts(tenant);
+        String parts = Parts.getParts(tenant, size, page);
         return parts != null ? ResponseEntity.ok(Utils.prettyPrint(parts)) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/synchroteam/{id}", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> getSynchroteamPart(@PathVariable String id, @RequestHeader("tenant") String tenantDomain) {
         Tenant tenant = tenantService.getTenantByDomain(tenantDomain);
-        String part = Parts.getPart(tenant, id);
+        String part = Parts.getPart(tenant, id, false);
+        return part != null ? ResponseEntity.ok(Utils.prettyPrint(part)) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/synchroteam/search", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+    public ResponseEntity<String> findSynchroteamPart(@RequestParam String reference, @RequestHeader("tenant") String tenantDomain) {
+        Tenant tenant = tenantService.getTenantByDomain(tenantDomain);
+        String part = Parts.getPart(tenant, reference, true);
         return part != null ? ResponseEntity.ok(Utils.prettyPrint(part)) : ResponseEntity.notFound().build();
     }
 
@@ -86,6 +95,19 @@ public class PartController {
             List<PartPriceUpdateDTO> prices = partsBulkUpdate.processFile(file);
             Activity activity = new Activity();
             activity = Parts.updatePartPrices(prices, tenant, activity);
+            return activity.isSuccessful() ? ResponseEntity.ok(activity.getActivity2()) : ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing file: " + e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/synchroteam/parts/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadPartsFile(@RequestParam("file") MultipartFile file, @RequestHeader("tenant") String tenantDomain) {
+        try {
+            Tenant tenant = tenantService.getTenantByDomain(tenantDomain);
+            List<PartDTO> parts = partsBulkUpdate.processPartsFile(file);
+            Activity activity = new Activity();
+            activity = Parts.updateParts(parts, tenant, activity);
             return activity.isSuccessful() ? ResponseEntity.ok(activity.getActivity2()) : ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error processing file: " + e.getMessage());
