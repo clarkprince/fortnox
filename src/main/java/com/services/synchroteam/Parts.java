@@ -150,10 +150,17 @@ public class Parts {
                         partMap.put("type", part.getType());
 
                     // Handle nested objects
-                    if (part.getCategory() != null && part.getCategory().getId() != null) {
+                    if (part.getCategory() != null) {
                         Map<String, Object> category = new HashMap<>();
-                        category.put("id", part.getCategory().getId());
-                        partMap.put("category", category);
+                        if (part.getCategory().getId() != null) {
+                            category.put("id", part.getCategory().getId());
+                        }
+                        if (part.getCategory().getName() != null) {
+                            category.put("name", part.getCategory().getName());
+                        }
+                        if (!category.isEmpty()) {
+                            partMap.put("category", category);
+                        }
                     }
 
                     if (part.getTax() != null && part.getTax().getId() != null) {

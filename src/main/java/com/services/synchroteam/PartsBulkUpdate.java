@@ -181,14 +181,28 @@ public class PartsBulkUpdate {
                 mapStringField(row, columnMap, "status", part::setStatus);
                 mapStringField(row, columnMap, "type", part::setType);
 
-                // Map category and tax with normalized headers
+                // Map category using either id or name
+                PartDTO.Category category = new PartDTO.Category();
+                boolean hasCategory = false;
+
                 if (columnMap.containsKey("categoryid")) {
                     String categoryId = convertCellToString(row.getCell(columnMap.get("categoryid")));
                     if (categoryId != null && !categoryId.isEmpty()) {
-                        PartDTO.Category category = new PartDTO.Category();
                         category.setId(Integer.parseInt(categoryId));
-                        part.setCategory(category);
+                        hasCategory = true;
                     }
+                }
+
+                if (columnMap.containsKey("categoryname")) {
+                    String categoryName = convertCellToString(row.getCell(columnMap.get("categoryname")));
+                    if (categoryName != null && !categoryName.isEmpty()) {
+                        category.setName(categoryName);
+                        hasCategory = true;
+                    }
+                }
+
+                if (hasCategory) {
+                    part.setCategory(category);
                 }
 
                 if (columnMap.containsKey("taxid")) {
