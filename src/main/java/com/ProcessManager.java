@@ -72,8 +72,7 @@ public class ProcessManager implements CommandLineRunner {
         log.info("Starting processes for all tenants...");
         while (true) {
             runProcessesByTenant();
-            int schedule = settingsRepository.findBySetting("schedule").map(s -> Integer.parseInt(s.getValue()))
-                    .orElse(300000);
+            int schedule = settingsRepository.findBySetting("schedule").map(s -> Integer.parseInt(s.getValue())).orElse(300000);
             Thread.sleep(schedule * 1000);
         }
     }
@@ -120,10 +119,8 @@ public class ProcessManager implements CommandLineRunner {
 
     private void runCustomerProcess(Tenant tenant) {
         try {
-            String fromTime = processMonitorRepository
-                    .findByProcessAndTenant(Processes.CUSTOMERS, tenant.getSynchroteamDomain())
-                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10))
-                    .orElse(LocalDateTime.now().minusMinutes(10))
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.CUSTOMERS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.CUSTOMERS, tenant.getSynchroteamDomain());
@@ -137,10 +134,8 @@ public class ProcessManager implements CommandLineRunner {
 
     private void runPartsProcess(Tenant tenant) {
         try {
-            String fromTime = processMonitorRepository
-                    .findByProcessAndTenant(Processes.PARTS, tenant.getSynchroteamDomain())
-                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10))
-                    .orElse(LocalDateTime.now().minusMinutes(10))
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.PARTS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.PARTS, tenant.getSynchroteamDomain());
@@ -154,10 +149,8 @@ public class ProcessManager implements CommandLineRunner {
 
     private void runJobsProcess(Tenant tenant) {
         try {
-            String fromTime = processMonitorRepository
-                    .findByProcessAndTenant(Processes.JOBS, tenant.getSynchroteamDomain())
-                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10))
-                    .orElse(LocalDateTime.now().minusMinutes(10))
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.JOBS, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.JOBS, tenant.getSynchroteamDomain());
@@ -171,10 +164,8 @@ public class ProcessManager implements CommandLineRunner {
 
     private void runInvoiceProcess(Tenant tenant) {
         try {
-            String fromTime = processMonitorRepository
-                    .findByProcessAndTenant(Processes.INVOICES, tenant.getSynchroteamDomain())
-                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10))
-                    .orElse(LocalDateTime.now().minusMinutes(10))
+            String fromTime = processMonitorRepository.findByProcessAndTenant(Processes.INVOICES, tenant.getSynchroteamDomain())
+                    .map(processMonitor -> processMonitor.getRunAt().minusMinutes(10)).orElse(LocalDateTime.now().minusMinutes(10))
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
             ProcessMonitor processMonitor = new ProcessMonitor(Processes.INVOICES, tenant.getSynchroteamDomain());
@@ -232,8 +223,7 @@ public class ProcessManager implements CommandLineRunner {
     }
 
     private boolean validTenant(Tenant tenant) {
-        if (tenant.getFortnoxToken() == null || tenant.getFortnoxToken().isEmpty()
-                || tenant.getFortNoxRefreshToken() == null
+        if (tenant.getFortnoxToken() == null || tenant.getFortnoxToken().isEmpty() || tenant.getFortNoxRefreshToken() == null
                 || tenant.getFortNoxRefreshToken().isEmpty()) {
             return false;
         }

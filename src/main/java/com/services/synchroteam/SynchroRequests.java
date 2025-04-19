@@ -43,7 +43,12 @@ public class SynchroRequests {
 
 		HttpEntity<String> entity = new HttpEntity<String>(data, SynchroRequests.getHTTPHeaders(domain, apiKey));
 		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+
 		if (response.getStatusCode().is2xxSuccessful()) {
+			String quotaRemaining = response.getHeaders().getFirst("X-Quota-Remaining");
+			if (quotaRemaining != null) {
+				tenant.setSynchroteamQuotaRemaining(Integer.parseInt(quotaRemaining));
+			}
 			return response.getBody();
 		}
 		return null;

@@ -47,7 +47,7 @@ public class HTMLFomatter {
 
         result.append("<html><head>\n");
         result.append("<style type=\"text/css\">\n");
-        result.append("body { font-family: Calibri; color: #000; font-size:13px }\n");
+        result.append("body { font-family: Calibri; color: #000; font-size:11px }\n");
         result.append("table { border-collapse: collapse; margin: 60px 0; width: 100%; }\n");
         result.append("td { padding: 6px; font-size:14px; border: 1px solid #dcdcdc }\n");
         result.append("tr:nth-child(even) { background-color: #f9f9f9; }\n");

@@ -35,6 +35,12 @@ public class Tenant {
     @Column(name = "tenant_active", columnDefinition = "BOOLEAN DEFAULT FALSE", nullable = false)
     private boolean tenantActive;
 
+    @Column(name = "synchroteam_quota_remaining", nullable = true)
+    private Integer synchroteamQuotaRemaining;
+
+    @Column(name = "synchroteam_quota_last_update", nullable = true)
+    private LocalDateTime synchroteamQuotaLastUpdate;
+
     @JsonProperty("lastSync")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
