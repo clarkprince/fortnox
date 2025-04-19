@@ -61,7 +61,7 @@ public class PartsQueueService {
     @Scheduled(fixedRate = 60000)
     public void processQueue() {
         try {
-            List<QueuePartDetails> pendingDetails = detailsRepository.findPendingDetails(2);
+            List<QueuePartDetails> pendingDetails = detailsRepository.findPendingDetails(1000);
             if (pendingDetails.isEmpty())
                 return;
 
