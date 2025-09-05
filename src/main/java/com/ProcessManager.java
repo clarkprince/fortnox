@@ -71,7 +71,7 @@ public class ProcessManager implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Starting processes for all tenants...");
         while (true) {
-            runProcessesByTenant();
+            // runProcessesByTenant();
             int schedule = settingsRepository.findBySetting("schedule").map(s -> Integer.parseInt(s.getValue())).orElse(300000);
             Thread.sleep(schedule * 1000);
         }
@@ -82,7 +82,7 @@ public class ProcessManager implements CommandLineRunner {
         log.info("Starting token refresh...");
         try {
             isAuthProcessRunning = true;
-            authorisedTenants();
+            // authorisedTenants();
         } catch (Exception e) {
             log.error("Error during token refresh: ", e);
         } finally {
@@ -212,6 +212,7 @@ public class ProcessManager implements CommandLineRunner {
             Map<String, String> auth = FortnoxAuth.doAuth(tenant.getFortNoxRefreshToken(), true);
             tenant.setFortnoxToken(auth.get("access_token"));
             tenant.setFortNoxRefreshToken(auth.get("refresh_token"));
+            tenant.setTenantActive(true);
             log.info("Successfully authorised tenant: " + tenant.getSynchroteamDomain());
         } catch (Exception e) {
             tenant.setTenantActive(false);
