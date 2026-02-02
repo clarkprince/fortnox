@@ -60,6 +60,7 @@ public class Invoices {
 		if (response != null) {
 			activity.setSuccessful(true);
 			activity.setActivity2(Utils.prettyPrint(response));
+			activity.setMessage(null);
 		}
 		return activity;
 	}

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.entities.Activity;
@@ -14,6 +15,7 @@ import com.entities.Tenant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.repository.SettingsRepository;
 import com.services.synchroteam.Customers;
 
 @Service
@@ -21,29 +23,47 @@ public class FnCustomers {
     private final Logger log = LoggerFactory.getLogger(FnCustomers.class);
     private int totalPages = 1;
 
+    @Autowired
+    private SettingsRepository settingsRepository;
+
+    private boolean shouldCheckCustomerDeliveryAddress(String tenant) {
+        return settingsRepository.findBySettingAndTenant("checkCustomerDeliveryAddress", tenant)
+                .map(setting -> "true".equalsIgnoreCase(setting.getValue())).orElse(false);
+    }
+
+    private String safeGetText(JsonNode node, String fieldName) {
+        JsonNode field = node.get(fieldName);
+        if (field == null || field.isNull()) {
+            return "";
+        }
+        String value = field.asText();
+        return "null".equalsIgnoreCase(value) ? "" : value;
+    }
+
     public void insertToFortnox(JsonNode data, Tenant tenant) throws Exception {
         log.info("inserting customer to fortnox");
         try {
             String uri = "/3/customers";
-            String vatNumber = data.get("vatNumber").asText();
-            if (vatNumber == null || vatNumber.equalsIgnoreCase("null") || vatNumber.equalsIgnoreCase("")) {
-                log.error("No vat number for customer: " + data.get("name").asText());
+            String vatNumber = safeGetText(data, "vatNumber");
+            if (vatNumber == null || vatNumber.isEmpty()) {
+                log.error("No vat number for customer: " + safeGetText(data, "name"));
                 return;
             }
 
             Map<String, Object> customerParent = new HashMap<>();
             Map<String, Object> customer = new HashMap<>();
-            if (data.get("myId") == null || data.get("myId").asText() == "") {
-                customer.put("CustomerNumber", data.get("id").asText());
+            String myId = safeGetText(data, "myId");
+            if (myId.isEmpty()) {
+                customer.put("CustomerNumber", safeGetText(data, "id"));
             } else {
-                customer.put("CustomerNumber", data.get("myId").asText());
+                customer.put("CustomerNumber", myId);
             }
 
-            customer.put("Name", data.get("name").asText());
-            customer.put("Address1", data.get("addressStreet").asText());
-            customer.put("Address2", data.get("addressProvince").asText());
-            customer.put("City", data.get("addressCity").asText());
-            customer.put("ZipCode", data.get("addressZIP").asText());
+            customer.put("Name", safeGetText(data, "name"));
+            customer.put("Address1", safeGetText(data, "addressStreet"));
+            customer.put("Address2", safeGetText(data, "addressProvince"));
+            customer.put("City", safeGetText(data, "addressCity"));
+            customer.put("ZipCode", safeGetText(data, "addressZIP"));
 
             customerParent.put("Customer", customer);
 
@@ -111,6 +131,19 @@ public class FnCustomers {
         for (JsonNode customer : customerLs) {
             Activity activity = new Activity();
             activity.setActivity1(customer.toPrettyString());
+
+            // Check if we should validate delivery address
+            if (shouldCheckCustomerDeliveryAddress(tenant.getSynchroteamDomain())) {
+                String deliveryAddress1 = safeGetText(customer, "DeliveryAddress1");
+                if (deliveryAddress1.trim().isEmpty()) {
+                    activity.setSuccessful(false);
+                    activity.setMessage("Skipped because there is no delivery address for the customer");
+                    log.info("Skipped customer {} - no delivery address", safeGetText(customer, "CustomerNumber"));
+                    processMonitor.getActivities().add(activity);
+                    continue;
+                }
+            }
+
             activity = createSynchroteamCustomer(customer, tenant, activity);
             processMonitor.getActivities().add(activity);
             try {
@@ -123,16 +156,29 @@ public class FnCustomers {
     }
 
     private Activity createSynchroteamCustomer(JsonNode customer, Tenant tenant, Activity activity) {
-        String customerNumber = customer.get("CustomerNumber").asText();
-        String name = customer.get("Name").asText();
-        String address1 = customer.get("Address1").asText();
-        String address2 = customer.get("Address2").asText();
-        String city = customer.get("City").asText();
-        String zipCode = customer.get("ZipCode").asText();
+        String customerNumber = safeGetText(customer, "CustomerNumber");
+        String name = safeGetText(customer, "Name");
 
-        String formattedAddress2 = address2 + " " + city;
+        // Determine which address to use based on setting
+        String address1, address2, city, zipCode;
 
-        return Customers.insertCustomer(customerNumber, name, address1, address1, formattedAddress2, zipCode, tenant, activity);
+        if (shouldCheckCustomerDeliveryAddress(tenant.getSynchroteamDomain())) {
+            // Use delivery address fields
+            address1 = safeGetText(customer, "DeliveryAddress1");
+            address2 = safeGetText(customer, "DeliveryAddress2");
+            city = safeGetText(customer, "DeliveryCity");
+            zipCode = safeGetText(customer, "DeliveryZipCode");
+        } else {
+            // Use regular address fields (existing behavior)
+            address1 = safeGetText(customer, "Address1");
+            address2 = safeGetText(customer, "Address2");
+            city = safeGetText(customer, "City");
+            zipCode = safeGetText(customer, "ZipCode");
+        }
+
+        String formattedCityAddress = (address2.trim().isEmpty() ? "" : address2 + " ") + city;
+
+        return Customers.insertCustomer(customerNumber, name, address1, address2, formattedCityAddress, zipCode, tenant, activity);
     }
 
     public void doSynchroteamCustomersToFortnox(String token, Tenant tenant) {
@@ -168,6 +214,18 @@ public class FnCustomers {
             JsonNode customer = doGetSingleCustomer(tenant, customerNumber);
             if (customer != null) {
                 activity.setActivity1(customer.toPrettyString());
+
+                // Check if we should validate delivery address
+                if (shouldCheckCustomerDeliveryAddress(tenant.getSynchroteamDomain())) {
+                    String deliveryAddress1 = safeGetText(customer, "DeliveryAddress1");
+                    if (deliveryAddress1.trim().isEmpty()) {
+                        activity.setSuccessful(false);
+                        activity.setMessage("Skipped because there is no delivery address for the customer");
+                        log.info("Skipped customer {} - no delivery address", customerNumber);
+                        return activity;
+                    }
+                }
+
                 activity = createSynchroteamCustomer(customer, tenant, activity);
             }
         } catch (Exception e) {
