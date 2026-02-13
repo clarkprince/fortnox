@@ -81,7 +81,8 @@ public class ActivityController {
         } else {
             if (!Utils.isEmpty(tenant)) {
                 if (!Utils.isEmpty(process)) {
-                    pageResult = activityRepository.findByTenantAndProcessAndCreatedAtBetween(tenant, process, fromDate, toDate, pageRequest);
+                    pageResult = activityRepository.findByTenantAndProcessAndCreatedAtBetween(tenant, process.toLowerCase(), fromDate, toDate,
+                            pageRequest);
                 } else {
                     pageResult = activityRepository.findByTenantAndCreatedAtBetween(tenant, fromDate, toDate, pageRequest);
                 }

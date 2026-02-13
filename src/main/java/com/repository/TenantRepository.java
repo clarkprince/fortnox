@@ -13,6 +13,6 @@ import com.entities.Tenant;
 public interface TenantRepository extends JpaRepository<Tenant, Integer> {
     Optional<Tenant> findBySynchroteamDomain(String synchroteamDomain);
 
-    @Query("SELECT t FROM Tenant t")
+    @Query("SELECT t FROM Tenant t ORDER BY t.id ASC")
     List<Tenant> findAllOptimised();
 }
