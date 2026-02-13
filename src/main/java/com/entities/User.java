@@ -35,7 +35,7 @@ public class User {
 
     private String tenant;
 
-    @Column(columnDefinition = "int DEFAULT 1")
+    @Column(nullable = true)
     private String role;
 
     private boolean active;

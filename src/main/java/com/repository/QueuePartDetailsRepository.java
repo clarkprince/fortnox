@@ -12,8 +12,8 @@ public interface QueuePartDetailsRepository extends JpaRepository<QueuePartDetai
     @Query("SELECT COUNT(d) FROM QueuePartDetails d WHERE d.status = ?1")
     int countByStatus(String status);
 
-    @Query(value = "SELECT d FROM QueuePartDetails d WHERE d.status = 'PENDING' ORDER BY d.createdAt ASC LIMIT ?1")
-    List<QueuePartDetails> findPendingDetails(int limit);
+    @Query("SELECT d FROM QueuePartDetails d WHERE d.status = 'PENDING' ORDER BY d.createdAt ASC")
+    List<QueuePartDetails> findPendingDetails(org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT d FROM QueuePartDetails d WHERE d.queue.tenantDomain = ?1 AND d.status = ?2 ORDER BY d.createdAt ASC")
     List<QueuePartDetails> findByTenantDomainAndStatusOrderByCreatedAt(String tenantDomain, String status);

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,7 @@ public class PartsQueueService {
     @Scheduled(fixedRate = 60000)
     public void processQueue() {
         try {
-            List<QueuePartDetails> pendingDetails = detailsRepository.findPendingDetails(1000);
+            List<QueuePartDetails> pendingDetails = detailsRepository.findPendingDetails(PageRequest.of(0, 1000));
             if (pendingDetails.isEmpty())
                 return;
 

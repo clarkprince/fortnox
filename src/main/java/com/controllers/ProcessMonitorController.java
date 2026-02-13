@@ -19,6 +19,6 @@ public class ProcessMonitorController {
 
     @GetMapping("/tenant/{tenant}/latest")
     public ResponseEntity<ProcessMonitor> getLatestProcessStatus(@PathVariable String tenant) {
-        return processMonitorRepository.findLatestByTenant(tenant).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return processMonitorRepository.findFirstByTenantOrderByRunAtDesc(tenant).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

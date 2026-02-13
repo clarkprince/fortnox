@@ -14,6 +14,6 @@ public interface ProcessMonitorRepository extends JpaRepository<ProcessMonitor, 
     @Query("SELECT pm FROM ProcessMonitor pm WHERE pm.process = :process AND pm.tenant = :tenant")
     Optional<ProcessMonitor> findByProcessAndTenant(String process, String tenant);
 
-    @Query("SELECT pm FROM ProcessMonitor pm WHERE pm.tenant = :tenant ORDER BY pm.runAt DESC limit 1")
-    Optional<ProcessMonitor> findLatestByTenant(@Param("tenant") String tenant);
+    @Query("SELECT pm FROM ProcessMonitor pm WHERE pm.tenant = :tenant ORDER BY pm.runAt DESC")
+    Optional<ProcessMonitor> findFirstByTenantOrderByRunAtDesc(@Param("tenant") String tenant);
 }
